@@ -1,0 +1,29 @@
+.gradle
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+!gradle/wrapper/gradle-wrapper.jar
+
+**/*.crt
+**/*.key
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+.run/
+!**/src/**/.run/
+
+### VS Code ###
+.vscode/
+
+/snyk
+/tmp
+
+application*.yml
+!**/src/**/application*.yml
