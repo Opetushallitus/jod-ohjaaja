@@ -1,0 +1,8 @@
+logging:
+  level:
+    root: INFO
+    fi.okm.jod: DEBUG
+spring:
+  sql:
+    init:
+      mode: never

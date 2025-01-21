@@ -13,3 +13,20 @@ Licensed under the European Union Public Licence EUPL-1.2 or later.
 
 ---
 
+## Getting Started
+
+The backend application is a Spring Boot 3 application that requires Java 21 and uses Gradle
+as a build tool.
+
+* Install a OpenJDK 21 distribution (e.g. [Eclipse Temurin™](https://adoptium.net/temurin/releases/)).
+* Install Docker and Docker compose
+* Clone the repository.
+* Run the application with `./gradlew bootRun`.
+* The application should be shortly available at `http://localhost:8080`.
+
+## Development
+
+* Build and test application with `./gradlew build`
+* Code style is enforced using Spotless and Checkstyle (based on Google Java Style).
+  * You can format the code with `./gradlew spotlessApply`.
+  * If using IntelliJ IDEA, the Checkstyle-IDEA and google-java-format plugins are recommended.

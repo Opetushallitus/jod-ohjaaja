@@ -1,0 +1,25 @@
+# same as compose.yml, but with ephemeral data for postgres
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - target: 6379
+        host_ip: 127.0.0.1
+    volumes:
+      - ./scripts/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ohjaaja
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - target: 5432
+        host_ip: 127.0.0.1
+        published: 45432
+    volumes:
+      - ./scripts/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    labels:
+      org.springframework.boot.jdbc.parameters: 'user=ohjaaja&password=ohjaaja'
