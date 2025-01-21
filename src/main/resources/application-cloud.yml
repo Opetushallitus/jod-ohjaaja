@@ -1,0 +1,44 @@
+spring:
+  config:
+    import:
+      - aws-parameterstore:/jod/ohjaaja/
+      - classpath:/saml2-suomifi.yml
+  cloud:
+    aws:
+      parameterstore:
+        enabled: true
+        reload:
+          period: 15m
+          strategy: refresh
+  datasource:
+    type: fi.okm.jod.ohjaaja.config.datasource.RdsIamAuthHikariDataSource
+server:
+  forward-headers-strategy: none
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-exception: false
+  tomcat:
+    custom:
+      secure-connector: true
+
+springdoc:
+  api-docs:
+    enabled: false
+
+logging:
+  config: classpath:logback-cloud.xml
+  level:
+    root: INFO
+    fi.okm.jod: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  cloudwatch:
+    metrics:
+      export:
+        namespace: "jod/ohjaaja"
+        batch-size: 20

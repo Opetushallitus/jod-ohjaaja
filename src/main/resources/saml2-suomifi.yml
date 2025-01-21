@@ -1,0 +1,48 @@
+---
+jod:
+  authentication:
+    provider: jod-ohjaaja-suomifi
+    supported-methods:
+      FIN:
+        - http://ftn.ficora.fi/2017/loa3
+        - http://ftn.ficora.fi/2017/loa2
+        - urn:oid:1.2.246.517.3002.110.999
+      EIDAS:
+        - http://eidas.europa.eu/LoA/high
+        - http://eidas.europa.eu/LoA/substantial
+
+spring:
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          jod-ohjaaja-suomifi:
+            name-id-format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+            singlelogout:
+              url: "{baseUrl}/logout/saml2/slo/{registrationId}"
+              response-url: "{baseUrl}/logout/saml2/slo/{registrationId}"
+              binding: post
+            signing:
+              credentials:
+                - private-key-location: "${jod.rp.key}"
+                  certificate-location: "${jod.rp.crt}"
+            decryption:
+              credentials:
+                - private-key-location: "${jod.rp.key}"
+                  certificate-location: "${jod.rp.crt}"
+            assertingparty:
+              metadata-uri: "https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml"
+              singlesignon:
+                binding: "REDIRECT"
+                url: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SSO"
+              singlelogout:
+                binding: "REDIRECT"
+                url: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SLO"
+                response-url: "https://testi.apro.tunnistus.fi/idp/profile/SAML2/Redirect/SLO"
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
