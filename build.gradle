@@ -2,17 +2,17 @@ plugins {
   id 'java'
   id 'jacoco'
 
-  id 'org.springframework.boot' version '3.4.1'
+  id 'org.springframework.boot' version '3.4.2'
   id 'io.spring.dependency-management' version '1.1.7'
 
   id 'checkstyle'
   id "com.diffplug.spotless" version "7.0.2"
-  id "com.github.spotbugs" version "6.1.2"
+  id "com.github.spotbugs" version "6.1.3"
   id "org.sonarqube" version "6.0.1.5171"
   id 'org.springdoc.openapi-gradle-plugin' version '1.9.0'
 
-  id "com.github.ben-manes.versions" version "0.51.0"
-  id 'org.cyclonedx.bom' version '2.0.0'
+  id "com.github.ben-manes.versions" version "0.52.0"
+  id 'org.cyclonedx.bom' version '2.1.0'
 }
 
 group = 'fi.okm.jod'
@@ -36,7 +36,7 @@ repositories {
 ext {
   spotbugsVersion = "4.9.0"
   bouncycastleVersion = "1.80"
-  springdocVersion = "2.8.3"
+  springdocVersion = "2.8.4"
 }
 
 configurations {
@@ -72,7 +72,7 @@ dependencies {
   implementation 'io.micrometer:micrometer-registry-cloudwatch2'
   implementation 'io.zipkin.aws:brave-propagation-aws'
 
-  implementation platform('software.amazon.awssdk:bom:2.30.2')
+  implementation platform('software.amazon.awssdk:bom:2.30.15')
   implementation 'software.amazon.awssdk:http-auth-aws'
   implementation 'software.amazon.awssdk:rds'
   implementation 'software.amazon.awssdk:sagemakerruntime'
