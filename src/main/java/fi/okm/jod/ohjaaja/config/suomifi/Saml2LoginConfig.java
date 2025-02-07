@@ -46,7 +46,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(name = "jod.authentication.provider", havingValue = "suomifi")
+@ConditionalOnProperty(name = "jod.authentication.provider", havingValue = "jod-ohjaaja-suomifi")
 @Slf4j
 public class Saml2LoginConfig {
   private final VetumaExtensionBuilder vetumaExtensionBuilder = new VetumaExtensionBuilder();
