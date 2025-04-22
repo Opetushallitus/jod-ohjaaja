@@ -10,8 +10,11 @@
 package fi.okm.jod.ohjaaja.config.mocklogin;
 
 import fi.okm.jod.ohjaaja.config.LoginSuccessHandler;
+import fi.okm.jod.ohjaaja.config.ProfileDeletionHandler;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
+import fi.okm.jod.ohjaaja.service.profiili.OhjaajaService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +34,10 @@ import org.springframework.util.StringUtils;
     havingValue = "mock",
     matchIfMissing = true)
 @Slf4j
+@RequiredArgsConstructor
 public class MockLoginConfig {
+
+  private final OhjaajaService ohjaajaService;
 
   /** Mock authentication using form login. */
   @Bean
@@ -45,10 +51,15 @@ public class MockLoginConfig {
 
     var logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
     logoutSuccessHandler.setRedirectStrategy(redirectStrategy);
+    var profileDeletionHandler = new ProfileDeletionHandler(ohjaajaService);
 
     return http.securityMatcher("/login/**", "/logout/**")
         .formLogin(login -> login.successHandler(loginSuccessHandler).loginPage("/login"))
-        .logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler))
+        .logout(
+            logout -> {
+              logout.addLogoutHandler(profileDeletionHandler);
+              logout.logoutSuccessHandler(logoutSuccessHandler);
+            })
         .headers(
             headers ->
                 headers.contentSecurityPolicy(
