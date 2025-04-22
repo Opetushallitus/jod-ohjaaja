@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OhjaajaService {
   private final OhjaajaRepository ohjaajat;
 
-  public void deleteProfiili(JodUser user) {
+  public void delete(JodUser user) {
     ohjaajat.deleteById(user.getId());
     ohjaajat.removeId(user.getId());
   }
