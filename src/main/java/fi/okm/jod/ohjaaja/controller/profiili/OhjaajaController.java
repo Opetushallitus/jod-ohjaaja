@@ -12,9 +12,13 @@ package fi.okm.jod.ohjaaja.controller.profiili;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.CsrfTokenDto;
 import fi.okm.jod.ohjaaja.dto.profiili.OhjaajaCsrfDto;
+import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
+import fi.okm.jod.ohjaaja.service.profiili.OhjaajaService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "profiili/ohjaaja")
 @RequiredArgsConstructor
 public class OhjaajaController {
+  private final OhjaajaService ohjaajaService;
 
   @GetMapping
   public OhjaajaCsrfDto get(
@@ -35,5 +40,13 @@ public class OhjaajaController {
         user.familyName(),
         new CsrfTokenDto(
             csrfToken.getToken(), csrfToken.getHeaderName(), csrfToken.getParameterName()));
+  }
+
+  @GetMapping("/vienti")
+  public ResponseEntity<OhjaajaExportDto> export(@AuthenticationPrincipal JodUser user) {
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=profiili.json")
+        .header(HttpHeaders.CONTENT_TYPE, "application/json")
+        .body(ohjaajaService.export(user));
   }
 }

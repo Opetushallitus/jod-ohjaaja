@@ -10,7 +10,10 @@
 package fi.okm.jod.ohjaaja.service.profiili;
 
 import fi.okm.jod.ohjaaja.domain.JodUser;
+import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
+import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
+import fi.okm.jod.ohjaaja.service.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,5 +27,16 @@ public class OhjaajaService {
   public void delete(JodUser user) {
     ohjaajat.deleteById(user.getId());
     ohjaajat.removeId(user.getId());
+  }
+
+  public OhjaajaExportDto export(JodUser user) {
+    var ohjaaja = getOhjaaja(user);
+    return ExportMapper.mapOhjaaja(ohjaaja);
+  }
+
+  private Ohjaaja getOhjaaja(JodUser user) {
+    return ohjaajat
+        .findById(user.getId())
+        .orElseThrow(() -> new NotFoundException("Profiili does not exist"));
   }
 }
