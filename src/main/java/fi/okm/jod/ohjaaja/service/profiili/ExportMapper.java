@@ -10,13 +10,28 @@
 package fi.okm.jod.ohjaaja.service.profiili;
 
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
+import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajanSuosikkiExportDto;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.entity.OhjaajanSuosikki;
+import java.util.stream.Collectors;
 
 public final class ExportMapper {
 
   private ExportMapper() {}
 
   public static OhjaajaExportDto mapOhjaaja(Ohjaaja entity) {
-    return entity == null ? null : new OhjaajaExportDto(entity.getId());
+    return entity == null
+        ? null
+        : new OhjaajaExportDto(
+            entity.getId(),
+            entity.getSuosikit().stream()
+                .map(ExportMapper::mapOhjaajanSuosikki)
+                .collect(Collectors.toSet()));
+  }
+
+  public static OhjaajanSuosikkiExportDto mapOhjaajanSuosikki(OhjaajanSuosikki entity) {
+    return entity == null
+        ? null
+        : new OhjaajanSuosikkiExportDto(entity.getId(), entity.getLuotu(), entity.getArtikkeliId());
   }
 }
