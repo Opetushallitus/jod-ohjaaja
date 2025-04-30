@@ -9,9 +9,8 @@
 
 package fi.okm.jod.ohjaaja.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,4 +27,7 @@ public class Ohjaaja {
   public Ohjaaja(UUID id) {
     this.id = id;
   }
+
+  @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  private Set<OhjaajanSuosikki> suosikit;
 }

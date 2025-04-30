@@ -9,7 +9,7 @@
 
 package fi.okm.jod.ohjaaja.dto.profiili.export;
 
-import java.util.Set;
+import java.time.Instant;
 import java.util.UUID;
 
-public record OhjaajaExportDto(UUID id, Set<OhjaajanSuosikkiExportDto> suosikit) {}
+public record OhjaajanSuosikkiExportDto(UUID id, Instant luotu, Long artikkeliId) {}
