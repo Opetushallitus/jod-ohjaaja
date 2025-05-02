@@ -94,7 +94,13 @@ public class SecurityConfig {
               csrf.ignoringRequestMatchers(csrfIgnoringRequestMatchers);
               csrf.csrfTokenRequestHandler(new HardenedCsrfTokenRequestHandler());
             })
-        .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers("/api/artikkeli/katselu")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
         .exceptionHandling(
             exceptionHandling -> {
               exceptionHandling.authenticationEntryPoint(
