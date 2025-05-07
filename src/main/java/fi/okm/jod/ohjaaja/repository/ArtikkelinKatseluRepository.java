@@ -11,6 +11,21 @@ package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKatselu;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface ArtikkelinKatseluRepository extends JpaRepository<ArtikkelinKatselu, UUID> {}
+public interface ArtikkelinKatseluRepository extends JpaRepository<ArtikkelinKatselu, UUID> {
+  @Query(
+      """
+      SELECT a.artikkeliId
+      FROM ArtikkelinKatselu a
+      WHERE a.ohjaajaId = :ohjaajaId
+      GROUP BY a.artikkeliId
+      ORDER BY MAX(a.luotu) DESC
+      """)
+  Page<Long> findMostRecentViewedArtikkeliIdsByOhjaajaId(
+      @Param("ohjaajaId") UUID ohjaajaId, Pageable pageable);
+}

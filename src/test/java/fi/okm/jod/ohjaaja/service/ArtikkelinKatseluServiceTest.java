@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 
 @Import({ArtikkelinKatseluService.class})
 class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
@@ -71,5 +72,44 @@ class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
 
     assertThrows(
         ServiceValidationException.class, () -> service.add(ohjaajaId, anonyymiId, artikkeliId));
+  }
+
+  @Test
+  void shouldReturnEmptySetWhenNoArtikkelinKatseluExists() {
+    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void shouldRetrieveMostRecentViewedArtikkeliId() {
+
+    var artikkeliId = 1L;
+    service.add(user.getId(), null, artikkeliId);
+
+    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+
+    assertFalse(result.isEmpty());
+    assertEquals(1, result.getTotalElements());
+    assertEquals(1L, result.getContent().getFirst());
+  }
+
+  @Test
+  void shouldReturnMostRecentArtikkeliIdsInOrder() {
+    var artikkeliId1 = 1L;
+    var artikkeliId2 = 2L;
+    var artikkeliId3 = 3L;
+
+    service.add(user.getId(), null, artikkeliId1);
+    service.add(user.getId(), null, artikkeliId2);
+    service.add(user.getId(), null, artikkeliId3);
+    service.add(user.getId(), null, artikkeliId2);
+
+    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+
+    assertFalse(result.isEmpty());
+    assertEquals(3, result.getTotalElements());
+    assertEquals(artikkeliId2, result.getContent().get(0));
+    assertEquals(artikkeliId3, result.getContent().get(1));
+    assertEquals(artikkeliId1, result.getContent().get(2));
   }
 }
