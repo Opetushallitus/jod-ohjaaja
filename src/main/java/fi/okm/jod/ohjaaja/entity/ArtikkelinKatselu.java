@@ -10,43 +10,26 @@
 package fi.okm.jod.ohjaaja.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.UUID;
-import javax.annotation.Nullable;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(
-    indexes = {
-      @Index(columnList = "artikkeliId"),
-      @Index(columnList = "ohjaaja_id"),
-      @Index(columnList = "anonyymiId")
-    })
+@Table
+@IdClass(ArtikkelinKatseluId.class)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArtikkelinKatselu {
-  @GeneratedValue @Id private UUID id;
-
-  @Column(updatable = false, nullable = false)
-  private Instant luotu;
-
-  @Column(updatable = false, nullable = false)
+  @Id
+  @Column(name = "artikkeli_id", nullable = false)
   private Long artikkeliId;
 
-  @Column(updatable = false)
-  private UUID ohjaajaId;
+  @Id
+  @Column(name = "paiva", nullable = false)
+  private LocalDate paiva;
 
-  @Column(updatable = false)
-  private String anonyymiId;
-
-  public ArtikkelinKatselu(
-      Long artikkeliId, @Nullable UUID ohjaajaId, @Nullable String anonyymiId) {
-    this.artikkeliId = artikkeliId;
-    this.ohjaajaId = ohjaajaId;
-    this.anonyymiId = anonyymiId;
-    this.luotu = Instant.now();
-  }
+  @Column(name = "maara", nullable = false)
+  private int maara;
 }

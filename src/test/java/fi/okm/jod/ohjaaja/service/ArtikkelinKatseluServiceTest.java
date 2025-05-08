@@ -12,7 +12,8 @@ package fi.okm.jod.ohjaaja.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKatseluRepository;
-import java.util.UUID;
+import fi.okm.jod.ohjaaja.repository.ViimeksiKatseltuArtikkeliRepository;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -22,75 +23,79 @@ import org.springframework.data.domain.Pageable;
 class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
 
   @Autowired private ArtikkelinKatseluService service;
-  @Autowired private ArtikkelinKatseluRepository repository;
+  @Autowired private ArtikkelinKatseluRepository artikkelinKatseluRepository;
+  @Autowired private ViimeksiKatseltuArtikkeliRepository viimeksiKatseltuArtikkeliRepository;
 
   @Test
-  void shouldAddArtikkelinKatseluForAnoonymiId() {
-    UUID ohjaajaId = null;
-    var anonyymiId = "anonyymi123";
+  void shouldAddOnlyArtikkelinKatseluWhenUserIsNull() {
     var artikkeliId = 1L;
-    var id = service.add(ohjaajaId, anonyymiId, artikkeliId);
+    service.add(null, artikkeliId);
 
-    assertNotNull(id);
-    var katselu = repository.findById(id).orElseThrow();
-    assertEquals(ohjaajaId, katselu.getOhjaajaId());
-    assertEquals(anonyymiId, katselu.getAnonyymiId());
+    var artikkelinKatselut = artikkelinKatseluRepository.findAll();
+    assertEquals(1, artikkelinKatselut.size());
+    var katselu = artikkelinKatselut.getFirst();
+    assertEquals(1L, katselu.getArtikkeliId());
+    assertEquals(1, katselu.getMaara());
+    assertEquals(LocalDate.now(), katselu.getPaiva());
+
+    var viimeksiKatsellut = viimeksiKatseltuArtikkeliRepository.findAll();
+    assertEquals(0, viimeksiKatsellut.size());
+  }
+
+  @Test
+  void shouldAddArtikkelinKatseluAndViimeksiKatseltuWhenUserIsLoggedIn() {
+    var artikkeliId = 1L;
+    service.add(user, artikkeliId);
+
+    var artikkelinKatselut = artikkelinKatseluRepository.findAll();
+    assertEquals(1, artikkelinKatselut.size());
+    var katselu = artikkelinKatselut.getFirst();
+    assertEquals(1L, katselu.getArtikkeliId());
+    assertEquals(1, katselu.getMaara());
+    assertEquals(LocalDate.now(), katselu.getPaiva());
+
+    var viimeksiKatsellut =
+        viimeksiKatseltuArtikkeliRepository.findByArtikkeliIdAndOhjaajaId(
+            artikkeliId, user.getId());
+    assertTrue(viimeksiKatsellut.isPresent());
+    assertEquals(artikkeliId, viimeksiKatsellut.get().getArtikkeliId());
+    assertEquals(user.getId(), viimeksiKatsellut.get().getOhjaajaId());
+    assertNotNull(viimeksiKatsellut.get().getViimeksiKatseltu());
+  }
+
+  @Test
+  void shouldIncreaseMaaraWhenArtikkeliIdAlreadyExists() {
+    var artikkeliId = 1L;
+    service.add(user, artikkeliId);
+    service.add(user, artikkeliId);
+
+    var artikkelinKatselut = artikkelinKatseluRepository.findAll();
+    assertEquals(1, artikkelinKatselut.size());
+    var katselu = artikkelinKatselut.getFirst();
     assertEquals(artikkeliId, katselu.getArtikkeliId());
-    assertNotNull(katselu.getLuotu());
+    assertEquals(2, katselu.getMaara());
   }
 
   @Test
-  void shouldAddArtikkelinKatseluForOhjaajaId() {
-    UUID ohjaajaId = UUID.randomUUID();
-    String anonyymiId = null;
-    var artikkeliId = 1L;
-    var id = service.add(ohjaajaId, anonyymiId, artikkeliId);
-
-    assertNotNull(id);
-    var katselu = repository.findById(id).orElseThrow();
-    assertEquals(ohjaajaId, katselu.getOhjaajaId());
-    assertEquals(anonyymiId, katselu.getAnonyymiId());
-    assertEquals(artikkeliId, katselu.getArtikkeliId());
-    assertNotNull(katselu.getLuotu());
-  }
-
-  @Test
-  void shouldNotAddArtikkelinKatseluForBothOhjaajaIdAndAnonyymiId() {
-    UUID ohjaajaId = UUID.randomUUID();
-    String anonyymiId = "anonyymi123";
-    var artikkeliId = 1L;
-
-    assertThrows(
-        ServiceValidationException.class, () -> service.add(ohjaajaId, anonyymiId, artikkeliId));
-  }
-
-  @Test
-  void shouldNotAddArtikkelinKatseluForNeitherOhjaajaIdNorAnonyymiId() {
-    UUID ohjaajaId = null;
-    String anonyymiId = null;
-    var artikkeliId = 1L;
-
-    assertThrows(
-        ServiceValidationException.class, () -> service.add(ohjaajaId, anonyymiId, artikkeliId));
+  void shouldNotAddArtikkelinKatseluWhenArtikkeliIdIsNull() {
+    assertThrows(IllegalArgumentException.class, () -> service.add(null, null));
   }
 
   @Test
   void shouldReturnEmptySetWhenNoArtikkelinKatseluExists() {
     var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
-    assertTrue(result.isEmpty());
+    assertEquals(0, result.maara());
   }
 
   @Test
   void shouldRetrieveMostRecentViewedArtikkeliId() {
 
     var artikkeliId = 1L;
-    service.add(user.getId(), null, artikkeliId);
+    service.add(user, artikkeliId);
 
     var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
-
-    assertFalse(result.isEmpty());
-    assertEquals(1, result.getTotalElements());
-    assertEquals(1L, result.getContent().getFirst());
+    assertEquals(1, result.maara());
+    assertEquals(1L, result.sisalto().getFirst());
   }
 
   @Test
@@ -99,17 +104,16 @@ class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
     var artikkeliId2 = 2L;
     var artikkeliId3 = 3L;
 
-    service.add(user.getId(), null, artikkeliId1);
-    service.add(user.getId(), null, artikkeliId2);
-    service.add(user.getId(), null, artikkeliId3);
-    service.add(user.getId(), null, artikkeliId2);
+    service.add(user, artikkeliId1);
+    service.add(user, artikkeliId2);
+    service.add(user, artikkeliId3);
+    service.add(user, artikkeliId2);
 
     var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
 
-    assertFalse(result.isEmpty());
-    assertEquals(3, result.getTotalElements());
-    assertEquals(artikkeliId2, result.getContent().get(0));
-    assertEquals(artikkeliId3, result.getContent().get(1));
-    assertEquals(artikkeliId1, result.getContent().get(2));
+    assertEquals(3, result.maara());
+    assertEquals(artikkeliId2, result.sisalto().getFirst());
+    assertEquals(artikkeliId3, result.sisalto().get(1));
+    assertEquals(artikkeliId1, result.sisalto().get(2));
   }
 }

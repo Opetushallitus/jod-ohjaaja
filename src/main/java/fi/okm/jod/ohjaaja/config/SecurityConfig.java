@@ -97,7 +97,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers("/api/artikkeli/katselu")
+                    .requestMatchers("/api/artikkeli/katselu/*")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
