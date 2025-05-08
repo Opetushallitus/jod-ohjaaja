@@ -10,22 +10,25 @@
 package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKatselu;
-import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import fi.okm.jod.ohjaaja.entity.ArtikkelinKatseluId;
+import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface ArtikkelinKatseluRepository extends JpaRepository<ArtikkelinKatselu, UUID> {
+public interface ArtikkelinKatseluRepository
+    extends JpaRepository<ArtikkelinKatselu, ArtikkelinKatseluId> {
+  @Modifying
+  @Transactional
   @Query(
-      """
-      SELECT a.artikkeliId
-      FROM ArtikkelinKatselu a
-      WHERE a.ohjaajaId = :ohjaajaId
-      GROUP BY a.artikkeliId
-      ORDER BY MAX(a.luotu) DESC
-      """)
-  Page<Long> findMostRecentViewedArtikkeliIdsByOhjaajaId(
-      @Param("ohjaajaId") UUID ohjaajaId, Pageable pageable);
+      value =
+          """
+          INSERT INTO artikkelin_katselu (artikkeli_id, paiva, maara)
+          VALUES (:artikkeliId, :paiva, 1)
+          ON CONFLICT (artikkeli_id, paiva)
+          DO UPDATE SET maara = artikkelin_katselu.maara + 1
+          """,
+      nativeQuery = true)
+  void upsertKatselu(Long artikkeliId, LocalDate paiva);
 }

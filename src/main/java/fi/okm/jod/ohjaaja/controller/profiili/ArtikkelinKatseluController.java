@@ -10,41 +10,32 @@
 package fi.okm.jod.ohjaaja.controller.profiili;
 
 import fi.okm.jod.ohjaaja.domain.JodUser;
-import fi.okm.jod.ohjaaja.dto.ArtikkelinKatseluDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
-import fi.okm.jod.ohjaaja.dto.validationgroup.Add;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKatseluService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/artikkeli/katselu")
+@RequestMapping("/api/artikkeli")
 @RequiredArgsConstructor
-@Tag(name = "artikkeli/katselu")
+@Tag(name = "artikkeli")
 public class ArtikkelinKatseluController {
   private final ArtikkelinKatseluService service;
 
-  @PostMapping
+  @PostMapping("/katselu/{artikkeliId}")
   @Operation(summary = "Adds a Katselu to the Artikkeli")
-  UUID add(
-      @AuthenticationPrincipal JodUser jodUser,
-      @Validated(Add.class) @RequestBody ArtikkelinKatseluDto artikkelinKatseluDto) {
-    var ohjaajaId = jodUser == null ? null : jodUser.getId();
-    return service.add(
-        ohjaajaId, artikkelinKatseluDto.anonyymiId(), artikkelinKatseluDto.artikkeliId());
+  void add(@AuthenticationPrincipal JodUser jodUser, @PathVariable long artikkeliId) {
+    service.add(jodUser, artikkeliId);
   }
 
   @GetMapping("/viimeksi-katsellut")
   @Operation(summary = "Gets the last viewed article ids")
   SivuDto<Long> getMostRecentViewedArtikkeliIds(
       @AuthenticationPrincipal JodUser jodUser, @RequestParam(defaultValue = "20") int koko) {
-    return new SivuDto<>(
-        service.findMostRecentViewedArtikkeliIdsByUser(jodUser, Pageable.ofSize(koko)));
+    return service.findMostRecentViewedArtikkeliIdsByUser(jodUser, Pageable.ofSize(koko));
   }
 }
