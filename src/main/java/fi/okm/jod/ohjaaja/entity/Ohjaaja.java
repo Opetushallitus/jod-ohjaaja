@@ -30,4 +30,7 @@ public class Ohjaaja {
 
   @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   private Set<OhjaajanSuosikki> suosikit;
+
+  @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  private Set<OhjaajanKiinnostus> kiinnostukset;
 }

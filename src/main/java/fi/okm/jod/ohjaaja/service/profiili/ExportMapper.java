@@ -10,8 +10,10 @@
 package fi.okm.jod.ohjaaja.service.profiili;
 
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
+import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajanKiinnostusExportDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajanSuosikkiExportDto;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.entity.OhjaajanKiinnostus;
 import fi.okm.jod.ohjaaja.entity.OhjaajanSuosikki;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,9 @@ public final class ExportMapper {
             entity.getId(),
             entity.getSuosikit().stream()
                 .map(ExportMapper::mapOhjaajanSuosikki)
+                .collect(Collectors.toSet()),
+            entity.getKiinnostukset().stream()
+                .map(ExportMapper::mapOhjaajanKiinnostus)
                 .collect(Collectors.toSet()));
   }
 
@@ -33,5 +38,12 @@ public final class ExportMapper {
     return entity == null
         ? null
         : new OhjaajanSuosikkiExportDto(entity.getId(), entity.getLuotu(), entity.getArtikkeliId());
+  }
+
+  public static OhjaajanKiinnostusExportDto mapOhjaajanKiinnostus(OhjaajanKiinnostus entity) {
+    return entity == null
+        ? null
+        : new OhjaajanKiinnostusExportDto(
+            entity.getId(), entity.getLuotu(), entity.getAsiasanaId());
   }
 }
