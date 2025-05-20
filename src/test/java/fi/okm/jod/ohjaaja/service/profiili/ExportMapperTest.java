@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test;
 public class ExportMapperTest {
   @Test
   void testNoNewOrDeletedMappingMethods() {
-    Set<String> expectedMethods = Set.of("mapOhjaaja", "mapOhjaajanSuosikki");
+    Set<String> expectedMethods =
+        Set.of("mapOhjaaja", "mapOhjaajanSuosikki", "mapOhjaajanKiinnostus");
 
     Set<String> actualMethods =
         Set.of(ExportMapper.class.getDeclaredMethods()).stream()
