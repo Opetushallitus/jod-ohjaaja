@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -27,6 +28,11 @@ public class Ohjaaja {
   public Ohjaaja(UUID id) {
     this.id = id;
   }
+
+  @Column
+  @Enumerated(EnumType.STRING)
+  @Setter
+  private TyoskentelyPaikka tyoskentelyPaikka;
 
   @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   private Set<OhjaajanSuosikki> suosikit;

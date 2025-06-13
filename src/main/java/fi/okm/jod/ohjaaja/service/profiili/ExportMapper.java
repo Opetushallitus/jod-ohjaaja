@@ -26,6 +26,7 @@ public final class ExportMapper {
         ? null
         : new OhjaajaExportDto(
             entity.getId(),
+            entity.getTyoskentelyPaikka(),
             entity.getSuosikit().stream()
                 .map(ExportMapper::mapOhjaajanSuosikki)
                 .collect(Collectors.toSet()),

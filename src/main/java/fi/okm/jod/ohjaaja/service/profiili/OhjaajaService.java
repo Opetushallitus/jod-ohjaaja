@@ -10,6 +10,7 @@
 package fi.okm.jod.ohjaaja.service.profiili;
 
 import fi.okm.jod.ohjaaja.domain.JodUser;
+import fi.okm.jod.ohjaaja.dto.profiili.OhjaajaDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
@@ -23,6 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OhjaajaService {
   private final OhjaajaRepository ohjaajat;
+
+  public OhjaajaDto get(JodUser user) {
+    var ohjaaja = getOhjaaja(user);
+    return new OhjaajaDto(ohjaaja.getTyoskentelyPaikka());
+  }
+
+  public void update(JodUser user, OhjaajaDto dto) {
+    var ohjaaja = getOhjaaja(user);
+    ohjaaja.setTyoskentelyPaikka(dto.tyoskentelyPaikka());
+    ohjaajat.save(ohjaaja);
+  }
 
   public void delete(JodUser user) {
     ohjaajat.deleteById(user.getId());

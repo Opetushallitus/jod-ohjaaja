@@ -12,18 +12,18 @@ package fi.okm.jod.ohjaaja.controller.profiili;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.CsrfTokenDto;
 import fi.okm.jod.ohjaaja.dto.profiili.OhjaajaCsrfDto;
+import fi.okm.jod.ohjaaja.dto.profiili.OhjaajaDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
 import fi.okm.jod.ohjaaja.service.profiili.OhjaajaService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/profiili/ohjaaja")
@@ -35,11 +35,18 @@ public class OhjaajaController {
   @GetMapping
   public OhjaajaCsrfDto get(
       @AuthenticationPrincipal JodUser user, @Parameter(hidden = true) CsrfToken csrfToken) {
+    var ohjaaja = ohjaajaService.get(user);
     return new OhjaajaCsrfDto(
         user.givenName(),
         user.familyName(),
         new CsrfTokenDto(
-            csrfToken.getToken(), csrfToken.getHeaderName(), csrfToken.getParameterName()));
+            csrfToken.getToken(), csrfToken.getHeaderName(), csrfToken.getParameterName()),
+        ohjaaja.tyoskentelyPaikka());
+  }
+
+  @PutMapping
+  public void update(@AuthenticationPrincipal JodUser user, @RequestBody @Valid OhjaajaDto dto) {
+    ohjaajaService.update(user, dto);
   }
 
   @GetMapping("/vienti")

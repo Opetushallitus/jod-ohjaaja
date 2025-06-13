@@ -7,14 +7,15 @@
  * Licensed under the EUPL-1.2-or-later.
  */
 
-package fi.okm.jod.ohjaaja.dto.profiili.export;
+package fi.okm.jod.ohjaaja.entity;
 
-import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
-import java.util.Set;
-import java.util.UUID;
-
-public record OhjaajaExportDto(
-    UUID id,
-    TyoskentelyPaikka tyoskentelyPaikka,
-    Set<OhjaajanSuosikkiExportDto> suosikit,
-    Set<OhjaajanKiinnostusExportDto> kiinnostukset) {}
+public enum TyoskentelyPaikka {
+  PERUSASTE,
+  TOINEN_ASTE,
+  KORKEAKOULU,
+  AIKUISKOULUTUS,
+  TYOLLISYYSPALVELUT,
+  KOLMAS_SEKTORI,
+  YKSITYINEN,
+  MUU
+}
