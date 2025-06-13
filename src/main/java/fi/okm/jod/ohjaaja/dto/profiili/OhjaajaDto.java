@@ -9,7 +9,6 @@
 
 package fi.okm.jod.ohjaaja.dto.profiili;
 
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
+import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
 
-public record OhjaajaDto(@NotNull UUID id) {}
+public record OhjaajaDto(TyoskentelyPaikka tyoskentelyPaikka) {}

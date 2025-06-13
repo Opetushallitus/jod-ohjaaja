@@ -10,6 +10,11 @@
 package fi.okm.jod.ohjaaja.dto.profiili;
 
 import fi.okm.jod.ohjaaja.dto.CsrfTokenDto;
+import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
 import jakarta.validation.constraints.NotNull;
 
-public record OhjaajaCsrfDto(String etunimi, String sukunimi, @NotNull CsrfTokenDto csrf) {}
+public record OhjaajaCsrfDto(
+    String etunimi,
+    String sukunimi,
+    @NotNull CsrfTokenDto csrf,
+    TyoskentelyPaikka tyoskentelyPaikka) {}
