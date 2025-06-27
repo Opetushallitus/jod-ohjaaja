@@ -15,8 +15,10 @@ import fi.okm.jod.ohjaaja.entity.ViimeksiKatseltuArtikkeli;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKatseluRepository;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import fi.okm.jod.ohjaaja.repository.ViimeksiKatseltuArtikkeliRepository;
+import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collection;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -60,5 +62,13 @@ public class ArtikkelinKatseluService {
         viimeksiKatseltuArtikkeli
             .findByOhjaajaIdOrderByViimeksiKatseltuDesc(ohjaajaId, pageable)
             .map(ViimeksiKatseltuArtikkeli::getArtikkeliId));
+  }
+
+  public SivuDto<Long> findMostViewedArtikkeliIds(
+      @Nullable Collection<Long> filterArtikkeliIds, Pageable pageable) {
+    return new SivuDto<>(
+        artikkelinKatselut
+            .findSumKatselut(filterArtikkeliIds, pageable)
+            .map(SummaPerArtikkeli::getArtikkeliId));
   }
 }
