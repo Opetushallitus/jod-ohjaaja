@@ -14,8 +14,12 @@ import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKatseluService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +34,15 @@ public class ArtikkelinKatseluController {
   @Operation(summary = "Adds a Katselu to the Artikkeli")
   void add(@AuthenticationPrincipal JodUser jodUser, @PathVariable long artikkeliId) {
     service.add(jodUser, artikkeliId);
+  }
+
+  @GetMapping("/katselu/katsotuimmat")
+  @Operation(summary = "Gets the most viewed article ids")
+  SivuDto<Long> getMostViewedArtikkeliIds(
+      @Nullable @RequestParam List<Long> filterByArtikkeliIds,
+      @RequestParam(defaultValue = "12") int koko) {
+    return service.findMostViewedArtikkeliIds(
+        filterByArtikkeliIds, PageRequest.of(0, koko, Sort.by(Sort.Direction.DESC, "summa")));
   }
 
   @GetMapping("/viimeksi-katsellut")
