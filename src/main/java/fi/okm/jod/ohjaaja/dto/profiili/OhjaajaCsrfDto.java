@@ -12,8 +12,10 @@ package fi.okm.jod.ohjaaja.dto.profiili;
 import fi.okm.jod.ohjaaja.dto.CsrfTokenDto;
 import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public record OhjaajaCsrfDto(
+    UUID id,
     String etunimi,
     String sukunimi,
     @NotNull CsrfTokenDto csrf,

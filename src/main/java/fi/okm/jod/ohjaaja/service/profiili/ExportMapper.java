@@ -9,9 +9,11 @@
 
 package fi.okm.jod.ohjaaja.service.profiili;
 
+import fi.okm.jod.ohjaaja.dto.profiili.export.ArtikkelinKommenttiExportDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajanKiinnostusExportDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajanSuosikkiExportDto;
+import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.entity.OhjaajanKiinnostus;
 import fi.okm.jod.ohjaaja.entity.OhjaajanSuosikki;
@@ -32,6 +34,9 @@ public final class ExportMapper {
                 .collect(Collectors.toSet()),
             entity.getKiinnostukset().stream()
                 .map(ExportMapper::mapOhjaajanKiinnostus)
+                .collect(Collectors.toSet()),
+            entity.getKommentit().stream()
+                .map(ExportMapper::mapArtikkelinKommentti)
                 .collect(Collectors.toSet()));
   }
 
@@ -46,5 +51,12 @@ public final class ExportMapper {
         ? null
         : new OhjaajanKiinnostusExportDto(
             entity.getId(), entity.getLuotu(), entity.getAsiasanaId());
+  }
+
+  public static ArtikkelinKommenttiExportDto mapArtikkelinKommentti(ArtikkelinKommentti entity) {
+    return entity == null
+        ? null
+        : new ArtikkelinKommenttiExportDto(
+            entity.getId(), entity.getLuotu(), entity.getArtikkeliId(), entity.getKommentti());
   }
 }

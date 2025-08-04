@@ -9,13 +9,8 @@
 
 package fi.okm.jod.ohjaaja.dto.profiili.export;
 
-import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
-import java.util.Set;
+import java.time.Instant;
 import java.util.UUID;
 
-public record OhjaajaExportDto(
-    UUID id,
-    TyoskentelyPaikka tyoskentelyPaikka,
-    Set<OhjaajanSuosikkiExportDto> suosikit,
-    Set<OhjaajanKiinnostusExportDto> kiinnostukset,
-    Set<ArtikkelinKommenttiExportDto> kommentit) {}
+public record ArtikkelinKommenttiExportDto(
+    UUID id, Instant luotu, long artikkeliId, String kommentti) {}

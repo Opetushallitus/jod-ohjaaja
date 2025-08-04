@@ -1,0 +1,128 @@
+/*
+ * Copyright (c) 2025 The Finnish Ministry of Education and Culture, The Finnish
+ * The Ministry of Economic Affairs and Employment, The Finnish National Agency of
+ * Education (Opetushallitus) and The Finnish Development and Administration centre
+ * for ELY Centres and TE Offices (KEHA).
+ *
+ * Licensed under the EUPL-1.2-or-later.
+ */
+
+package fi.okm.jod.ohjaaja.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.testutil.TestJodUser;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
+
+@Import({ArtikkelinKommenttiService.class})
+class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
+  @Autowired private ArtikkelinKommenttiService service;
+
+  @Test
+  @WithMockUser
+  void addCommentCleansHtmlContent() {
+    var commentWithHtml = "<script>alert('XSS');</script>Valid comment";
+    var result = service.add(user, 1L, commentWithHtml);
+    assertNotNull(result);
+    assertEquals("Valid comment", result.kommentti());
+  }
+
+  @Test
+  @WithMockUser
+  void addCommentWithValidContent() {
+    var artikkeliId = 1L;
+    var commentContent = "Valid comment";
+    var result = service.add(user, artikkeliId, commentContent);
+    assertNotNull(result);
+    assertEquals(commentContent, result.kommentti());
+    assertEquals(artikkeliId, result.artikkeliId());
+  }
+
+  @Test
+  @WithMockUser
+  void addCommentWithEmptyContent() {
+    var artikkeliId = 1L;
+    service.add(user, artikkeliId, "");
+    var result = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    assertNotNull(result);
+    assertEquals(1, result.maara());
+    assertEquals("", result.sisalto().getFirst().kommentti());
+    assertEquals(artikkeliId, result.sisalto().getFirst().artikkeliId());
+  }
+
+  @Test
+  @WithMockUser
+  void addCommentWithNullContentThrowsException() {
+    var artikkeliId = 1L;
+    assertThrows(NullPointerException.class, () -> service.add(user, artikkeliId, null));
+  }
+
+  @Test
+  @WithMockUser
+  void addCommentWithHTMLContentWorks() {
+    var artikkeliId = 1L;
+    var commentContent = "<b>Bold comment</b>";
+    var result = service.add(user, artikkeliId, commentContent);
+    assertNotNull(result);
+    assertEquals(commentContent, result.kommentti());
+    assertEquals(artikkeliId, result.artikkeliId());
+  }
+
+  @Test
+  void findByArtikkeliIdReturnsPaginatedResults() {
+    var pageable = Pageable.ofSize(10);
+    var artikkeliId = 1L;
+    var commentId = service.add(user, artikkeliId, "Test comment 1").id();
+    var result = service.findByArtikkeliId(artikkeliId, pageable);
+    assertNotNull(result);
+    assertEquals(1, result.maara());
+    assertEquals("Test comment 1", result.sisalto().getFirst().kommentti());
+    assertEquals(commentId, result.sisalto().getFirst().id());
+  }
+
+  @Test
+  void addCommentThrowsExceptionForNullUser() {
+    assertThrows(NullPointerException.class, () -> service.add(null, 1L, "Valid comment"));
+  }
+
+  @Test
+  @WithMockUser
+  void deleteCommentByOwnerSucceeds() {
+    var artikkeliId = 1L;
+    var testComment1Id = service.add(user, artikkeliId, "Test comment 1").id();
+    var testComment2Id = service.add(user, artikkeliId, "Test comment 2").id();
+
+    service.delete(user, testComment1Id);
+
+    var comments = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    assertNotNull(comments);
+    assertEquals(1, comments.maara());
+    assertEquals("Test comment 2", comments.sisalto().getFirst().kommentti());
+    assertEquals(testComment2Id, comments.sisalto().getFirst().id());
+  }
+
+  @Test
+  @WithMockUser
+  void cantDeleteCommentByNonOwner() {
+    var artikkeliId = 1L;
+    var otherUser = new TestJodUser(entityManager.persist(new Ohjaaja(UUID.randomUUID())).getId());
+    var testComment1Id = service.add(otherUser, artikkeliId, "Test comment 1").id();
+    var testComment2Id = service.add(user, artikkeliId, "Test comment 2").id();
+
+    service.delete(user, testComment1Id);
+
+    var comments = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    assertNotNull(comments);
+    assertEquals(2, comments.maara());
+    assertEquals("Test comment 1", comments.sisalto().get(0).kommentti());
+    assertEquals("Test comment 2", comments.sisalto().get(1).kommentti());
+    assertEquals(testComment1Id, comments.sisalto().get(0).id());
+    assertEquals(testComment2Id, comments.sisalto().get(1).id());
+  }
+}

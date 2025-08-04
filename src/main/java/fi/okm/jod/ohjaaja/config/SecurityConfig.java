@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -98,6 +99,8 @@ public class SecurityConfig {
             authorize ->
                 authorize
                     .requestMatchers("/api/artikkeli/katselu/*")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/artikkeli/kommentit")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
