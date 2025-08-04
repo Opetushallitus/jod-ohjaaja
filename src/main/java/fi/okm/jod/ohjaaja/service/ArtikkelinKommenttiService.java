@@ -20,6 +20,7 @@ import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,12 @@ public class ArtikkelinKommenttiService {
   private final ArtikkelinKommenttiRepository artikkelinKommentit;
   private final OhjaajaRepository ohjaajat;
 
+  private static final Document.OutputSettings outputSettings =
+      new Document.OutputSettings().prettyPrint(false);
+
   public ArtikkelinKommenttiDto add(
       @NotNull JodUser jodUser, long artikkeliId, @NotNull String kommentti) {
-    var cleanedKommentti = clean(kommentti, Safelist.relaxed());
+    var cleanedKommentti = clean(kommentti, "", Safelist.relaxed(), outputSettings);
     var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
     var artikkelinKommentti = new ArtikkelinKommentti(ohjaaja, artikkeliId, cleanedKommentti);
     return ArtikkelinKommenttiMapper.mapArtikkelinKommentti(
