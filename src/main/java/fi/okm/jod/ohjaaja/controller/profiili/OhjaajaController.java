@@ -37,6 +37,7 @@ public class OhjaajaController {
       @AuthenticationPrincipal JodUser user, @Parameter(hidden = true) CsrfToken csrfToken) {
     var ohjaaja = ohjaajaService.get(user);
     return new OhjaajaCsrfDto(
+        ohjaaja.id(),
         user.givenName(),
         user.familyName(),
         new CsrfTokenDto(

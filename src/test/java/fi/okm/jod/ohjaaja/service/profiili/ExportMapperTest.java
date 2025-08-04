@@ -24,7 +24,8 @@ public class ExportMapperTest {
   @Test
   void testNoNewOrDeletedMappingMethods() {
     Set<String> expectedMethods =
-        Set.of("mapOhjaaja", "mapOhjaajanSuosikki", "mapOhjaajanKiinnostus");
+        Set.of(
+            "mapOhjaaja", "mapOhjaajanSuosikki", "mapOhjaajanKiinnostus", "mapArtikkelinKommentti");
 
     Set<String> actualMethods =
         Set.of(ExportMapper.class.getDeclaredMethods()).stream()

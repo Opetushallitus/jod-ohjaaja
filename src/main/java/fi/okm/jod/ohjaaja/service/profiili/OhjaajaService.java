@@ -27,7 +27,7 @@ public class OhjaajaService {
 
   public OhjaajaDto get(JodUser user) {
     var ohjaaja = getOhjaaja(user);
-    return new OhjaajaDto(ohjaaja.getTyoskentelyPaikka());
+    return new OhjaajaDto(ohjaaja.getId(), ohjaaja.getTyoskentelyPaikka());
   }
 
   public void update(JodUser user, OhjaajaDto dto) {

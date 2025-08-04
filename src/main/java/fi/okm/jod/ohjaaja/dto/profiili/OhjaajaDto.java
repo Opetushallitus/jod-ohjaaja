@@ -10,5 +10,6 @@
 package fi.okm.jod.ohjaaja.dto.profiili;
 
 import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
+import java.util.UUID;
 
-public record OhjaajaDto(TyoskentelyPaikka tyoskentelyPaikka) {}
+public record OhjaajaDto(UUID id, TyoskentelyPaikka tyoskentelyPaikka) {}

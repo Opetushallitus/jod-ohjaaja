@@ -53,7 +53,8 @@ class OhjaajaControllerTest {
   @Test
   @WithUserDetails("test")
   void shouldReturnUserInformation() throws Exception {
-    when(ohjaajaService.get(any())).thenReturn(new OhjaajaDto(TyoskentelyPaikka.TOINEN_ASTE));
+    when(ohjaajaService.get(any()))
+        .thenReturn(new OhjaajaDto(UUID.randomUUID(), TyoskentelyPaikka.TOINEN_ASTE));
     mockMvc
         .perform(get("/api/profiili/ohjaaja").with(csrf()))
         .andExpect(status().isOk())
