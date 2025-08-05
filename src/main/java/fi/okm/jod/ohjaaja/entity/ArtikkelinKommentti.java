@@ -37,7 +37,7 @@ public class ArtikkelinKommentti {
   @Column(updatable = false, nullable = false)
   private Instant luotu;
 
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false, length = 2000)
   private String kommentti;
 
   public ArtikkelinKommentti(Ohjaaja ohjaaja, Long artikkeliId, String kommentti) {
