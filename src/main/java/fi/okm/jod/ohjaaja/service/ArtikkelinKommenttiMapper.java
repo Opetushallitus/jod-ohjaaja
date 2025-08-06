@@ -11,6 +11,8 @@ package fi.okm.jod.ohjaaja.service;
 
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
+import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import java.util.Optional;
 
 public final class ArtikkelinKommenttiMapper {
 
@@ -22,7 +24,7 @@ public final class ArtikkelinKommenttiMapper {
         : new ArtikkelinKommenttiDto(
             entity.getId(),
             entity.getArtikkeliId(),
-            entity.getOhjaaja().getId(),
+            Optional.ofNullable(entity.getOhjaaja()).map(Ohjaaja::getId).orElse(null),
             entity.getKommentti(),
             entity.getLuotu());
   }
