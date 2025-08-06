@@ -40,6 +40,6 @@ public class Ohjaaja {
   @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   private Set<OhjaajanKiinnostus> kiinnostukset;
 
-  @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "ohjaaja", fetch = FetchType.LAZY)
   private Set<ArtikkelinKommentti> kommentit;
 }
