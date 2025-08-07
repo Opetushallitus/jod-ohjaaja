@@ -15,10 +15,12 @@ import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
+import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommenttiRepository;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArtikkelinKommenttiService {
 
   private final ArtikkelinKommenttiRepository artikkelinKommentit;
+  private final ArtikkelinKommentinIlmiantoRepository artikkelinKommentinIlmianto;
   private final OhjaajaRepository ohjaajat;
 
   private static final Document.OutputSettings outputSettings =
@@ -60,5 +63,10 @@ public class ArtikkelinKommenttiService {
         kommentit.map(ArtikkelinKommenttiMapper::mapArtikkelinKommentti).getContent(),
         kommentit.getTotalElements(),
         kommentit.getTotalPages());
+  }
+
+  public void ilmianna(UUID artikkelinKommenttiId, @Nullable JodUser jodUser) {
+    boolean tunnistautunut = jodUser != null;
+    artikkelinKommentinIlmianto.upsertIlmianto(artikkelinKommenttiId, tunnistautunut);
   }
 }

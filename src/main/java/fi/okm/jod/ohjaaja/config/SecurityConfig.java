@@ -102,6 +102,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/artikkeli/kommentit")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/artikkeli/kommentit/*/ilmianto")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(

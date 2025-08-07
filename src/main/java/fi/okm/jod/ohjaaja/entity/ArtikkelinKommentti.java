@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +43,9 @@ public class ArtikkelinKommentti {
 
   @Column(updatable = false, nullable = false, length = 2000)
   private String kommentti;
+
+  @OneToMany(mappedBy = "artikkelinKommentti", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  private Set<ArtikkelinKommentinIlmianto> ilmiannot;
 
   public ArtikkelinKommentti(Ohjaaja ohjaaja, Long artikkeliId, String kommentti) {
     this.ohjaaja = ohjaaja;
