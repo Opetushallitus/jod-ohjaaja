@@ -11,18 +11,22 @@ package fi.okm.jod.ohjaaja.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentinIlmianto;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.testutil.TestJodUser;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 
 @Import({ArtikkelinKommenttiService.class})
 class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Autowired private ArtikkelinKommenttiService service;
+  @Autowired private ArtikkelinKommentinIlmiantoRepository ilmiantoRepository;
 
   @Test
   @WithMockUser
@@ -124,5 +128,99 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
     assertEquals("Test comment 2", comments.sisalto().get(1).kommentti());
     assertEquals(testComment1Id, comments.sisalto().get(0).id());
     assertEquals(testComment2Id, comments.sisalto().get(1).id());
+  }
+
+  @Test
+  void anonymousUserCanAddArtikkelinKommenttiIlmianto() {
+    var artikkeliId = 1L;
+    var commentContent = "Ilmianto kommentti";
+    var result = service.add(user, artikkeliId, commentContent);
+    service.ilmianna(result.id(), null);
+    var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
+    assertNotNull(ilmiannot);
+    assertEquals(1, ilmiannot.size());
+    assertEquals(1, ilmiannot.getFirst().getMaara());
+    assertFalse(ilmiannot.getFirst().isTunnistautunut());
+  }
+
+  @Test
+  void anonymousUserCanAddMultipleIlmiannot() {
+    var artikkeliId = 1L;
+    var commentContent = "Ilmianto kommentti";
+    var result = service.add(user, artikkeliId, commentContent);
+    service.ilmianna(result.id(), null);
+    service.ilmianna(result.id(), null);
+    var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
+    assertNotNull(ilmiannot);
+    assertEquals(1, ilmiannot.size());
+    assertEquals(2, ilmiannot.getFirst().getMaara());
+    assertFalse(ilmiannot.getFirst().isTunnistautunut());
+  }
+
+  @Test
+  @WithMockUser
+  void authenticatedUserCanAddArtikkelinKommenttiIlmianto() {
+    var artikkeliId = 1L;
+    var commentContent = "Ilmianto kommentti";
+    var result = service.add(user, artikkeliId, commentContent);
+    service.ilmianna(result.id(), user);
+    var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
+    assertNotNull(ilmiannot);
+    assertEquals(1, ilmiannot.size());
+    assertEquals(1, ilmiannot.getFirst().getMaara());
+    assertTrue(ilmiannot.getFirst().isTunnistautunut());
+  }
+
+  @Test
+  @WithMockUser
+  void authenticatedUserCanAddMultipleIlmiannot() {
+    var artikkeliId = 1L;
+    var commentContent = "Ilmianto kommentti";
+    var result = service.add(user, artikkeliId, commentContent);
+    service.ilmianna(result.id(), user);
+    service.ilmianna(result.id(), user);
+    var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
+    assertNotNull(ilmiannot);
+    assertEquals(1, ilmiannot.size());
+    assertEquals(2, ilmiannot.getFirst().getMaara());
+    assertTrue(ilmiannot.getFirst().isTunnistautunut());
+  }
+
+  @Test
+  @WithMockUser
+  void authenticatedAndUnautheticatedIlminantoCreatesTwoRows() {
+    var artikkeliId = 1L;
+    var commentContent = "Ilmianto kommentti";
+    var result = service.add(user, artikkeliId, commentContent);
+
+    // Unauthenticated ilmianto
+    service.ilmianna(result.id(), null);
+
+    // Authenticated ilmianto
+    service.ilmianna(result.id(), user);
+
+    var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
+    assertNotNull(ilmiannot);
+    assertEquals(2, ilmiannot.size());
+
+    // Check unauthenticated ilmianto
+    var unauthenticatedIlmianto =
+        ilmiannot.stream().filter(ilmianto -> !ilmianto.isTunnistautunut()).findFirst();
+    assertTrue(unauthenticatedIlmianto.isPresent());
+    assertEquals(1, unauthenticatedIlmianto.get().getMaara());
+
+    // Check authenticated ilmianto
+    var authenticatedIlmianto =
+        ilmiannot.stream().filter(ArtikkelinKommentinIlmianto::isTunnistautunut).findFirst();
+    assertTrue(authenticatedIlmianto.isPresent());
+    assertEquals(1, authenticatedIlmianto.get().getMaara());
+  }
+
+  @Test
+  @WithMockUser
+  void authenticatedUserCantAddIlmiantoToNonExistentComment() {
+    var nonExistentCommentId = UUID.randomUUID();
+    assertThrows(
+        DataIntegrityViolationException.class, () -> service.ilmianna(nonExistentCommentId, user));
   }
 }

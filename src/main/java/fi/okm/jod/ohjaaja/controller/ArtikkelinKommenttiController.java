@@ -54,4 +54,9 @@ public class ArtikkelinKommenttiController {
   void deleteArtikkelinKommentti(@AuthenticationPrincipal JodUser user, @PathVariable UUID id) {
     service.delete(user, id);
   }
+
+  @PostMapping("/{id}/ilmianto")
+  public void ilmiannaKommentti(@AuthenticationPrincipal JodUser user, @PathVariable UUID id) {
+    service.ilmianna(id, user);
+  }
 }
