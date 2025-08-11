@@ -46,11 +46,11 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 @EnableMethodSecurity
 @Slf4j
-public class SecurityConfig {
+public class ApiSecurityConfig {
 
   @Bean
   @SuppressWarnings("java:S4502")
-  public SecurityFilterChain securityFilterChain(
+  public SecurityFilterChain apiSecurityFilterChain(
       HttpSecurity http,
       Environment env,
       @Value("${jod.session.maxDuration}") Duration sessionMaxDuration)

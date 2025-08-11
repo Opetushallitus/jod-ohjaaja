@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.okm.jod.ohjaaja.config.SecurityConfig;
+import fi.okm.jod.ohjaaja.config.ApiSecurityConfig;
 import fi.okm.jod.ohjaaja.config.mocklogin.MockJodUserImpl;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
@@ -43,7 +43,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(value = ArtikkelinKommenttiController.class)
-@Import({ErrorInfoFactory.class, SecurityConfig.class})
+@Import({ErrorInfoFactory.class, ApiSecurityConfig.class})
 class ArtikkelinKommenttiControllerTest {
   @MockitoBean private ArtikkelinKommenttiService service;
   @Autowired private MockMvc mockMvc;
