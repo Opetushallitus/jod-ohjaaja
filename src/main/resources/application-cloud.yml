@@ -12,6 +12,11 @@ spring:
           strategy: refresh
   datasource:
     type: fi.okm.jod.ohjaaja.config.datasource.RdsIamAuthHikariDataSource
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${jod.ohjaaja.internal-api.oauth2-issuer}
 server:
   forward-headers-strategy: none
   shutdown: graceful

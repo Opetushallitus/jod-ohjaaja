@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentinIlmianto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentinIlmiantoId;
+import fi.okm.jod.ohjaaja.repository.projection.IlmiantoYhteenveto;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
@@ -34,4 +35,30 @@ public interface ArtikkelinKommentinIlmiantoRepository
   void upsertIlmianto(UUID artikkelinKommenttiId, boolean tunnistautunut);
 
   List<ArtikkelinKommentinIlmianto> findByArtikkelinKommenttiId(UUID artikkelinKommenttiId);
+
+  @Query(
+      value =
+          """
+          SELECT
+              k.id  AS artikkelinKommenttiId,
+              k.kommentti AS kommentti,
+              k.luotu AS kommentinAika,
+              SUM(CASE WHEN a.tunnistautunut THEN a.maara ELSE 0 END) AS kirjautuneetMaara,
+              SUM(CASE WHEN NOT a.tunnistautunut THEN a.maara ELSE 0 END) AS anonyymitMaara,
+              MAX(a.viimeksi_ilmiannettu) AS viimeisinIlmianto
+          FROM artikkelin_kommentti k
+          JOIN artikkelin_kommentin_ilmianto a ON k.id = a.artikkelin_kommentti_id
+          GROUP BY k.id
+          ORDER BY MAX(a.viimeksi_ilmiannettu) DESC
+          """,
+      nativeQuery = true)
+  List<IlmiantoYhteenveto> getAllIlmiantoYhteenveto();
+
+  @Modifying
+  @Transactional
+  @Query(
+      value =
+          "DELETE FROM artikkelin_kommentin_ilmianto WHERE artikkelin_kommentti_id = :kommenttiId",
+      nativeQuery = true)
+  void deleteAllByArtikkelinKommenttiId(UUID kommenttiId);
 }
