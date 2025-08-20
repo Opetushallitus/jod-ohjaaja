@@ -66,6 +66,7 @@ springdoc:
     disable-swagger-default-url: true
     operations-sorter: alpha
     tags-sorter: alpha
+  paths-to-exclude: "/internal-api/**"
 
 logging:
   level:

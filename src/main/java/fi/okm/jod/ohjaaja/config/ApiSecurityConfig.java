@@ -104,6 +104,8 @@ public class ApiSecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/artikkeli/kommentit/*/ilmianto")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/feature/*")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(
