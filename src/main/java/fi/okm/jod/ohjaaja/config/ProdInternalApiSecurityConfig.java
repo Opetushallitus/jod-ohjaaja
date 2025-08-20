@@ -34,7 +34,8 @@ public class ProdInternalApiSecurityConfig {
   @SuppressWarnings("java:S4502")
   public SecurityFilterChain internaApiSecurityFilterChain(
       HttpSecurity http,
-      @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String issuerUri)
+      @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String issuerUri,
+      @Value("SCOPE_${jod.ohjaaja.internal-api.oauth2-scope:}") String scope)
       throws Exception {
 
     http.securityMatcher("/internal-api/**")
@@ -42,7 +43,7 @@ public class ProdInternalApiSecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(AbstractHttpConfigurer::disable)
         .requestCache(RequestCacheConfigurer::disable)
-        .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated());
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().hasAuthority(scope));
 
     if (issuerUri != null && !issuerUri.isEmpty()) {
       http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

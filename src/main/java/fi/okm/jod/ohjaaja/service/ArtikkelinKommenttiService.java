@@ -11,10 +11,12 @@ package fi.okm.jod.ohjaaja.service;
 
 import static org.jsoup.Jsoup.clean;
 
+import fi.okm.jod.ohjaaja.annotation.FeatureRequired;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
+import fi.okm.jod.ohjaaja.entity.FeatureFlag;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommenttiRepository;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
@@ -40,6 +42,7 @@ public class ArtikkelinKommenttiService {
   private static final Document.OutputSettings outputSettings =
       new Document.OutputSettings().prettyPrint(false);
 
+  @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public ArtikkelinKommenttiDto add(
       @NotNull JodUser jodUser, long artikkeliId, @NotNull String kommentti) {
     var cleanedKommentti = clean(kommentti, "", Safelist.relaxed(), outputSettings);
@@ -49,6 +52,7 @@ public class ArtikkelinKommenttiService {
         artikkelinKommentit.save(artikkelinKommentti));
   }
 
+  @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public void delete(@NotNull JodUser jodUser, UUID kommenttiId) {
     var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
     var artikkelinKommentti = artikkelinKommentit.getReferenceById(kommenttiId);
@@ -57,6 +61,7 @@ public class ArtikkelinKommenttiService {
     }
   }
 
+  @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public SivuDto<ArtikkelinKommenttiDto> findByArtikkeliId(long artikkeliId, Pageable pageable) {
     var kommentit = artikkelinKommentit.findByArtikkeliId(artikkeliId, pageable);
     return new SivuDto<>(
@@ -65,6 +70,7 @@ public class ArtikkelinKommenttiService {
         kommentit.getTotalPages());
   }
 
+  @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public void ilmianna(UUID artikkelinKommenttiId, @Nullable JodUser jodUser) {
     boolean tunnistautunut = jodUser != null;
     artikkelinKommentinIlmianto.upsertIlmianto(artikkelinKommenttiId, tunnistautunut);
