@@ -18,5 +18,5 @@ import java.util.UUID;
 
 public record SuosikkiDto(
     @Null(groups = Add.class) @Schema(accessMode = Schema.AccessMode.READ_ONLY) UUID id,
-    @NotNull Long artikkeliId,
+    @NotNull String artikkeliErc,
     @Null(groups = Add.class) @Schema(accessMode = Schema.AccessMode.READ_ONLY) Instant luotu) {}

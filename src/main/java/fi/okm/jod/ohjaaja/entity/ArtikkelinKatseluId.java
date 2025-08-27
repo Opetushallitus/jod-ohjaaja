@@ -27,18 +27,18 @@ import lombok.Setter;
 public class ArtikkelinKatseluId implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
-  private Long artikkeliId;
+  private String artikkeliErc;
   private LocalDate paiva;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof ArtikkelinKatseluId that)) return false;
-    return Objects.equals(artikkeliId, that.artikkeliId) && Objects.equals(paiva, that.paiva);
+    return Objects.equals(artikkeliErc, that.artikkeliErc) && Objects.equals(paiva, that.paiva);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artikkeliId, paiva);
+    return Objects.hash(artikkeliErc, paiva);
   }
 }

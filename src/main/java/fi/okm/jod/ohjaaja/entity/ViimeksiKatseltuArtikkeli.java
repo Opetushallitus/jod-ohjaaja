@@ -21,15 +21,15 @@ import lombok.Setter;
 @Getter
 @Table(
     indexes = {@Index(columnList = "ohjaaja_id")},
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"artikkeli_id", "ohjaaja_id"})})
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"artikkeli_erc", "ohjaaja_id"})})
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViimeksiKatseltuArtikkeli {
 
   @Id @GeneratedValue private Long id;
 
-  @Column(name = "artikkeli_id", nullable = false)
-  private Long artikkeliId;
+  @Column(name = "artikkeli_erc", nullable = false)
+  private String artikkeliErc;
 
   @Column(name = "ohjaaja_id", nullable = false)
   private UUID ohjaajaId;
@@ -38,8 +38,8 @@ public class ViimeksiKatseltuArtikkeli {
   @Column(name = "viimeksi_katseltu", nullable = false)
   private Instant viimeksiKatseltu;
 
-  public ViimeksiKatseltuArtikkeli(Long artikkeliId, UUID ohjaajaId) {
-    this.artikkeliId = artikkeliId;
+  public ViimeksiKatseltuArtikkeli(String artikkeliErc, UUID ohjaajaId) {
+    this.artikkeliErc = artikkeliErc;
     this.ohjaajaId = ohjaajaId;
     this.viimeksiKatseltu = Instant.now();
   }

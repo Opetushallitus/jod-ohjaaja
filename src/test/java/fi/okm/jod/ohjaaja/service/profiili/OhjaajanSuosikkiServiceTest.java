@@ -30,8 +30,8 @@ class OhjaajanSuosikkiServiceTest extends AbstractServiceTest {
   @WithMockUser
   void shoudAddOhjaajanSuosikki() throws AssertionFailure {
 
-    final Long artikkeliId = 123L;
-    var newId = service.add(user, artikkeliId);
+    final String artikkeliErc = "external-reference-code";
+    var newId = service.add(user, artikkeliErc);
     var suosikit = service.findAll(user);
 
     assertEquals(1, suosikit.size());
@@ -39,15 +39,15 @@ class OhjaajanSuosikkiServiceTest extends AbstractServiceTest {
     assertNotNull(suosikki.id());
     assertEquals(newId, suosikki.id());
     assertNotNull(suosikki.luotu());
-    assertEquals(artikkeliId, suosikki.artikkeliId());
+    assertEquals(artikkeliErc, suosikki.artikkeliErc());
   }
 
   @Test
   @WithMockUser
   void shouldNotAddSameDataTwice() throws AssertionFailure {
-    final Long artikkeliId = 123L;
-    var newId = service.add(user, artikkeliId);
-    var newId2 = service.add(user, artikkeliId);
+    final String artikkeliErc = "external-reference-code";
+    var newId = service.add(user, artikkeliErc);
+    var newId2 = service.add(user, artikkeliErc);
     assertEquals(newId, newId2);
 
     var suosikit = service.findAll(user);
@@ -57,12 +57,12 @@ class OhjaajanSuosikkiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void shouldRemoveOhjaajanSuosikki() throws AssertionFailure {
-    final Long artikkeliId1 = 1123L;
-    final Long artikkeliId2 = 2123L;
-    final Long artikkeliId3 = 3123L;
-    var newId1 = service.add(user, artikkeliId1);
-    var newId2 = service.add(user, artikkeliId2);
-    var newId3 = service.add(user, artikkeliId3);
+    final String artikkeliErc1 = "external-reference-code1";
+    final String artikkeliErc2 = "external-reference-code2";
+    final String artikkeliErc3 = "external-reference-code3";
+    var newId1 = service.add(user, artikkeliErc1);
+    var newId2 = service.add(user, artikkeliErc2);
+    var newId3 = service.add(user, artikkeliErc3);
     var suosikitBeforeDelete = service.findAll(user);
 
     assertEquals(3, suosikitBeforeDelete.size());

@@ -18,8 +18,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ViimeksiKatseltuArtikkeliRepository
     extends JpaRepository<ViimeksiKatseltuArtikkeli, Long> {
-  Optional<ViimeksiKatseltuArtikkeli> findByArtikkeliIdAndOhjaajaId(
-      Long artikkeliId, UUID ohjaajaId);
+  Optional<ViimeksiKatseltuArtikkeli> findByArtikkeliErcAndOhjaajaId(
+      String artikkeliErc, UUID ohjaajaId);
 
   Page<ViimeksiKatseltuArtikkeli> findByOhjaajaIdOrderByViimeksiKatseltuDesc(
       UUID ohjaajaId, Pageable pageable);

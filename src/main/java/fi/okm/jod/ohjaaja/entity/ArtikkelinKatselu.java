@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ArtikkelinKatselu {
   @Id
-  @Column(name = "artikkeli_id", nullable = false)
-  private Long artikkeliId;
+  @Column(name = "artikkeli_erc", nullable = false)
+  private String artikkeliErc;
 
   @Id
   @Column(name = "paiva", nullable = false)

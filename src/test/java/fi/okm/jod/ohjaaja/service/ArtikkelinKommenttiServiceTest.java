@@ -32,7 +32,7 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @WithMockUser
   void addCommentCleansHtmlContent() {
     var commentWithHtml = "<script>alert('XSS');</script>Valid comment";
-    var result = service.add(user, 1L, commentWithHtml);
+    var result = service.add(user, "external-reference-code", commentWithHtml);
     assertNotNull(result);
     assertEquals("Valid comment", result.kommentti());
   }
@@ -40,50 +40,50 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void addCommentWithValidContent() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Valid comment";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     assertNotNull(result);
     assertEquals(commentContent, result.kommentti());
-    assertEquals(artikkeliId, result.artikkeliId());
+    assertEquals(artikkeliErc, result.artikkeliErc());
   }
 
   @Test
   @WithMockUser
   void addCommentWithEmptyContent() {
-    var artikkeliId = 1L;
-    service.add(user, artikkeliId, "");
-    var result = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    var artikkeliErc = "external-reference-code";
+    service.add(user, artikkeliErc, "");
+    var result = service.findByArtikkeliErc(artikkeliErc, Pageable.ofSize(10));
     assertNotNull(result);
     assertEquals(1, result.maara());
     assertEquals("", result.sisalto().getFirst().kommentti());
-    assertEquals(artikkeliId, result.sisalto().getFirst().artikkeliId());
+    assertEquals(artikkeliErc, result.sisalto().getFirst().artikkeliErc());
   }
 
   @Test
   @WithMockUser
   void addCommentWithNullContentThrowsException() {
-    var artikkeliId = 1L;
-    assertThrows(NullPointerException.class, () -> service.add(user, artikkeliId, null));
+    var artikkeliErc = "external-reference-code";
+    assertThrows(NullPointerException.class, () -> service.add(user, artikkeliErc, null));
   }
 
   @Test
   @WithMockUser
   void addCommentWithHTMLContentWorks() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "<b>Bold comment</b>";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     assertNotNull(result);
     assertEquals(commentContent, result.kommentti());
-    assertEquals(artikkeliId, result.artikkeliId());
+    assertEquals(artikkeliErc, result.artikkeliErc());
   }
 
   @Test
-  void findByArtikkeliIdReturnsPaginatedResults() {
+  void findByArtikkeliErcReturnsPaginatedResults() {
     var pageable = Pageable.ofSize(10);
-    var artikkeliId = 1L;
-    var commentId = service.add(user, artikkeliId, "Test comment 1").id();
-    var result = service.findByArtikkeliId(artikkeliId, pageable);
+    var artikkeliErc = "external-reference-code";
+    var commentId = service.add(user, artikkeliErc, "Test comment 1").id();
+    var result = service.findByArtikkeliErc(artikkeliErc, pageable);
     assertNotNull(result);
     assertEquals(1, result.maara());
     assertEquals("Test comment 1", result.sisalto().getFirst().kommentti());
@@ -92,19 +92,21 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
 
   @Test
   void addCommentThrowsExceptionForNullUser() {
-    assertThrows(NullPointerException.class, () -> service.add(null, 1L, "Valid comment"));
+    assertThrows(
+        NullPointerException.class,
+        () -> service.add(null, "external-reference-code", "Valid comment"));
   }
 
   @Test
   @WithMockUser
   void deleteCommentByOwnerSucceeds() {
-    var artikkeliId = 1L;
-    var testComment1Id = service.add(user, artikkeliId, "Test comment 1").id();
-    var testComment2Id = service.add(user, artikkeliId, "Test comment 2").id();
+    var artikkeliErc = "external-reference-code";
+    var testComment1Id = service.add(user, artikkeliErc, "Test comment 1").id();
+    var testComment2Id = service.add(user, artikkeliErc, "Test comment 2").id();
 
     service.delete(user, testComment1Id);
 
-    var comments = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    var comments = service.findByArtikkeliErc(artikkeliErc, Pageable.ofSize(10));
     assertNotNull(comments);
     assertEquals(1, comments.maara());
     assertEquals("Test comment 2", comments.sisalto().getFirst().kommentti());
@@ -114,14 +116,14 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void cantDeleteCommentByNonOwner() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var otherUser = new TestJodUser(entityManager.persist(new Ohjaaja(UUID.randomUUID())).getId());
-    var testComment1Id = service.add(otherUser, artikkeliId, "Test comment 1").id();
-    var testComment2Id = service.add(user, artikkeliId, "Test comment 2").id();
+    var testComment1Id = service.add(otherUser, artikkeliErc, "Test comment 1").id();
+    var testComment2Id = service.add(user, artikkeliErc, "Test comment 2").id();
 
     service.delete(user, testComment1Id);
 
-    var comments = service.findByArtikkeliId(artikkeliId, Pageable.ofSize(10));
+    var comments = service.findByArtikkeliErc(artikkeliErc, Pageable.ofSize(10));
     assertNotNull(comments);
     assertEquals(2, comments.maara());
     assertEquals("Test comment 1", comments.sisalto().get(0).kommentti());
@@ -132,9 +134,9 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
 
   @Test
   void anonymousUserCanAddArtikkelinKommenttiIlmianto() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     service.ilmianna(result.id(), null);
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
     assertNotNull(ilmiannot);
@@ -145,9 +147,9 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
 
   @Test
   void anonymousUserCanAddMultipleIlmiannot() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     service.ilmianna(result.id(), null);
     service.ilmianna(result.id(), null);
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
@@ -160,9 +162,9 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void authenticatedUserCanAddArtikkelinKommenttiIlmianto() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     service.ilmianna(result.id(), user);
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
     assertNotNull(ilmiannot);
@@ -174,9 +176,9 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void authenticatedUserCanAddMultipleIlmiannot() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
     service.ilmianna(result.id(), user);
     service.ilmianna(result.id(), user);
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
@@ -189,9 +191,9 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @Test
   @WithMockUser
   void authenticatedAndUnautheticatedIlminantoCreatesTwoRows() {
-    var artikkeliId = 1L;
+    var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
-    var result = service.add(user, artikkeliId, commentContent);
+    var result = service.add(user, artikkeliErc, commentContent);
 
     // Unauthenticated ilmianto
     service.ilmianna(result.id(), null);

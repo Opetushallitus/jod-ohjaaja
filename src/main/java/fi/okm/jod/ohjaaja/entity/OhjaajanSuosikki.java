@@ -31,11 +31,11 @@ public class OhjaajanSuosikki {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   private Ohjaaja ohjaaja;
 
-  @Column(updatable = false, nullable = false)
-  private Long artikkeliId;
+  @Column(name = "artikkeli_erc", updatable = false, nullable = false)
+  private String artikkeliErc;
 
-  public OhjaajanSuosikki(Long artikkeliId, Ohjaaja ohjaaja) {
-    this.artikkeliId = artikkeliId;
+  public OhjaajanSuosikki(String artikkeliErc, Ohjaaja ohjaaja) {
+    this.artikkeliErc = artikkeliErc;
     this.ohjaaja = ohjaaja;
     this.luotu = Instant.now();
   }

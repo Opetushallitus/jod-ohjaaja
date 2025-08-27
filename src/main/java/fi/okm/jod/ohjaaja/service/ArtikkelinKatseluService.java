@@ -33,16 +33,16 @@ public class ArtikkelinKatseluService {
   private final ViimeksiKatseltuArtikkeliRepository viimeksiKatseltuArtikkeli;
   private final OhjaajaRepository ohjaajat;
 
-  public void add(@Nullable JodUser jodUser, Long artikkeliId) {
+  public void add(@Nullable JodUser jodUser, String artikkeliErc) {
     LocalDate paiva = LocalDate.now();
 
-    artikkelinKatselut.upsertKatselu(artikkeliId, paiva);
+    artikkelinKatselut.upsertKatselu(artikkeliErc, paiva);
 
     if (jodUser != null) {
       var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
 
       viimeksiKatseltuArtikkeli
-          .findByArtikkeliIdAndOhjaajaId(artikkeliId, ohjaaja.getId())
+          .findByArtikkeliErcAndOhjaajaId(artikkeliErc, ohjaaja.getId())
           .ifPresentOrElse(
               existing -> {
                 existing.setViimeksiKatseltu(Instant.now());
@@ -50,25 +50,25 @@ public class ArtikkelinKatseluService {
               },
               () -> {
                 var uusiViimeksiKatseltu =
-                    new ViimeksiKatseltuArtikkeli(artikkeliId, ohjaaja.getId());
+                    new ViimeksiKatseltuArtikkeli(artikkeliErc, ohjaaja.getId());
                 viimeksiKatseltuArtikkeli.save(uusiViimeksiKatseltu);
               });
     }
   }
 
-  public SivuDto<Long> findMostRecentViewedArtikkeliIdsByUser(JodUser user, Pageable pageable) {
+  public SivuDto<String> findMostRecentViewedArtikkeliErcsByUser(JodUser user, Pageable pageable) {
     var ohjaajaId = ohjaajat.getReferenceById(user.getId()).getId();
     return new SivuDto<>(
         viimeksiKatseltuArtikkeli
             .findByOhjaajaIdOrderByViimeksiKatseltuDesc(ohjaajaId, pageable)
-            .map(ViimeksiKatseltuArtikkeli::getArtikkeliId));
+            .map(ViimeksiKatseltuArtikkeli::getArtikkeliErc));
   }
 
-  public SivuDto<Long> findMostViewedArtikkeliIds(
-      @Nullable Collection<Long> filterArtikkeliIds, Pageable pageable) {
+  public SivuDto<String> findMostViewedArtikkeliErcs(
+      @Nullable Collection<String> filterArtikkeliErcs, Pageable pageable) {
     return new SivuDto<>(
         artikkelinKatselut
-            .findSumKatselut(filterArtikkeliIds, pageable)
-            .map(SummaPerArtikkeli::getArtikkeliId));
+            .findSumKatselut(filterArtikkeliErcs, pageable)
+            .map(SummaPerArtikkeli::getArtikkeliErc));
   }
 }

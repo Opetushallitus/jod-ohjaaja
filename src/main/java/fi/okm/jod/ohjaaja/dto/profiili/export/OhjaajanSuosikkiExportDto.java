@@ -12,4 +12,4 @@ package fi.okm.jod.ohjaaja.dto.profiili.export;
 import java.time.Instant;
 import java.util.UUID;
 
-public record OhjaajanSuosikkiExportDto(UUID id, Instant luotu, Long artikkeliId) {}
+public record OhjaajanSuosikkiExportDto(UUID id, Instant luotu, String artikkeliErc) {}
