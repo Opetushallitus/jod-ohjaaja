@@ -33,16 +33,16 @@ public class OhjaajanSuosikkiService {
     return suosikit.findByOhjaaja(ohjaaja).stream()
         .map(
             suosikki ->
-                new SuosikkiDto(suosikki.getId(), suosikki.getArtikkeliId(), suosikki.getLuotu()))
+                new SuosikkiDto(suosikki.getId(), suosikki.getArtikkeliErc(), suosikki.getLuotu()))
         .toList();
   }
 
-  public UUID add(JodUser user, Long artikkeliId) {
+  public UUID add(JodUser user, String artikkeliErc) {
     var ohjaaja = ohjaajat.getReferenceById(user.getId());
     return suosikit
-        .findByOhjaajaAndArtikkeliId(ohjaaja, artikkeliId)
+        .findByOhjaajaAndArtikkeliErc(ohjaaja, artikkeliErc)
         .map(OhjaajanSuosikki::getId)
-        .orElseGet(() -> suosikit.save(new OhjaajanSuosikki(artikkeliId, ohjaaja)).getId());
+        .orElseGet(() -> suosikit.save(new OhjaajanSuosikki(artikkeliErc, ohjaaja)).getId());
   }
 
   public void delete(JodUser user, UUID id) {

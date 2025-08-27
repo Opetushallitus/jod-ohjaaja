@@ -30,25 +30,25 @@ import org.springframework.web.bind.annotation.*;
 public class ArtikkelinKatseluController {
   private final ArtikkelinKatseluService service;
 
-  @PostMapping("/katselu/{artikkeliId}")
+  @PostMapping("/katselu/{artikkeliErc}")
   @Operation(summary = "Adds a Katselu to the Artikkeli")
-  void add(@AuthenticationPrincipal JodUser jodUser, @PathVariable long artikkeliId) {
-    service.add(jodUser, artikkeliId);
+  void add(@AuthenticationPrincipal JodUser jodUser, @PathVariable String artikkeliErc) {
+    service.add(jodUser, artikkeliErc);
   }
 
   @GetMapping("/katselu/katsotuimmat")
-  @Operation(summary = "Gets the most viewed article ids")
-  SivuDto<Long> getMostViewedArtikkeliIds(
-      @Nullable @RequestParam List<Long> filterByArtikkeliIds,
+  @Operation(summary = "Gets the most viewed article Ercs")
+  SivuDto<String> getMostViewedArtikkeliIds(
+      @Nullable @RequestParam List<String> filterByArtikkeliErcs,
       @RequestParam(defaultValue = "12") int koko) {
-    return service.findMostViewedArtikkeliIds(
-        filterByArtikkeliIds, PageRequest.of(0, koko, Sort.by(Sort.Direction.DESC, "summa")));
+    return service.findMostViewedArtikkeliErcs(
+        filterByArtikkeliErcs, PageRequest.of(0, koko, Sort.by(Sort.Direction.DESC, "summa")));
   }
 
   @GetMapping("/viimeksi-katsellut")
-  @Operation(summary = "Gets the last viewed article ids")
-  SivuDto<Long> getMostRecentViewedArtikkeliIds(
+  @Operation(summary = "Gets the last viewed article Ercs")
+  SivuDto<String> getMostRecentViewedArtikkeliIds(
       @AuthenticationPrincipal JodUser jodUser, @RequestParam(defaultValue = "20") int koko) {
-    return service.findMostRecentViewedArtikkeliIdsByUser(jodUser, Pageable.ofSize(koko));
+    return service.findMostRecentViewedArtikkeliErcsByUser(jodUser, Pageable.ofSize(koko));
   }
 }

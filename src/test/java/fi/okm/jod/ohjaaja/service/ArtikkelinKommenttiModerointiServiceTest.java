@@ -33,7 +33,8 @@ class ArtikkelinKommenttiModerointiServiceTest extends AbstractServiceTest {
   void shouldReturnEmptyListWhenNoIlmianto() {
 
     var ohjaaja = entityManager.find(Ohjaaja.class, user.getId());
-    entityManager.persist(new ArtikkelinKommentti(ohjaaja, 1L, "Test Comment"));
+    entityManager.persist(
+        new ArtikkelinKommentti(ohjaaja, "external-reference-code", "Test Comment"));
 
     var ilmianto = service.getAllIlmiantoYhteenveto();
     assertTrue(ilmianto.isEmpty(), "Expected no ilmianto to be returned");
@@ -43,7 +44,9 @@ class ArtikkelinKommenttiModerointiServiceTest extends AbstractServiceTest {
   void shouldReturnOneIlmiantoYhteenvetoWhenThereIsOnlyOneAnonymousIlmianto() {
 
     var ohjaaja = entityManager.find(Ohjaaja.class, user.getId());
-    var kommentti = entityManager.persist(new ArtikkelinKommentti(ohjaaja, 1L, "Test Comment"));
+    var kommentti =
+        entityManager.persist(
+            new ArtikkelinKommentti(ohjaaja, "external-reference-code", "Test Comment"));
 
     ilmiantoRepository.upsertIlmianto(kommentti.getId(), false);
 
@@ -67,7 +70,9 @@ class ArtikkelinKommenttiModerointiServiceTest extends AbstractServiceTest {
   void shouldReturnOneIlmiantoYhteenvetoWhenThereIsOneAnonymousAndOneAuthenticatedIlmianto() {
 
     var ohjaaja = entityManager.find(Ohjaaja.class, user.getId());
-    var kommentti = entityManager.persist(new ArtikkelinKommentti(ohjaaja, 1L, "Test Comment"));
+    var kommentti =
+        entityManager.persist(
+            new ArtikkelinKommentti(ohjaaja, "external-reference-code", "Test Comment"));
 
     ilmiantoRepository.upsertIlmianto(kommentti.getId(), false);
     ilmiantoRepository.upsertIlmianto(kommentti.getId(), true);

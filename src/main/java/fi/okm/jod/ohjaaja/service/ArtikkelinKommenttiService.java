@@ -44,10 +44,10 @@ public class ArtikkelinKommenttiService {
 
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public ArtikkelinKommenttiDto add(
-      @NotNull JodUser jodUser, long artikkeliId, @NotNull String kommentti) {
+      @NotNull JodUser jodUser, @NotNull String artikkeliErc, @NotNull String kommentti) {
     var cleanedKommentti = clean(kommentti, "", Safelist.relaxed(), outputSettings);
     var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
-    var artikkelinKommentti = new ArtikkelinKommentti(ohjaaja, artikkeliId, cleanedKommentti);
+    var artikkelinKommentti = new ArtikkelinKommentti(ohjaaja, artikkeliErc, cleanedKommentti);
     return ArtikkelinKommenttiMapper.mapArtikkelinKommentti(
         artikkelinKommentit.save(artikkelinKommentti));
   }
@@ -62,8 +62,9 @@ public class ArtikkelinKommenttiService {
   }
 
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
-  public SivuDto<ArtikkelinKommenttiDto> findByArtikkeliId(long artikkeliId, Pageable pageable) {
-    var kommentit = artikkelinKommentit.findByArtikkeliId(artikkeliId, pageable);
+  public SivuDto<ArtikkelinKommenttiDto> findByArtikkeliErc(
+      String artikkeliErc, Pageable pageable) {
+    var kommentit = artikkelinKommentit.findByArtikkeliErc(artikkeliErc, pageable);
     return new SivuDto<>(
         kommentit.map(ArtikkelinKommenttiMapper::mapArtikkelinKommentti).getContent(),
         kommentit.getTotalElements(),

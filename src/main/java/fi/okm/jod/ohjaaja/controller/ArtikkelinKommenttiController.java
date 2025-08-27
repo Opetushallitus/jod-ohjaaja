@@ -35,10 +35,10 @@ public class ArtikkelinKommenttiController {
   @GetMapping
   @Operation(summary = "Finds all artikkelin kommentit")
   SivuDto<ArtikkelinKommenttiDto> findAllArtikkelinKommentit(
-      @RequestParam long artikkeliId, @RequestParam int sivu, @RequestParam int koko) {
+      @RequestParam String artikkeliErc, @RequestParam int sivu, @RequestParam int koko) {
 
-    return service.findByArtikkeliId(
-        artikkeliId, PageRequest.of(sivu, koko, Sort.by(Sort.Direction.DESC, "luotu")));
+    return service.findByArtikkeliErc(
+        artikkeliErc, PageRequest.of(sivu, koko, Sort.by(Sort.Direction.DESC, "luotu")));
   }
 
   @PostMapping
@@ -46,7 +46,7 @@ public class ArtikkelinKommenttiController {
   ArtikkelinKommenttiDto createArtikkelinKommentti(
       @AuthenticationPrincipal JodUser user,
       @Validated(Add.class) @RequestBody ArtikkelinKommenttiDto kommenttiDto) {
-    return service.add(user, kommenttiDto.artikkeliId(), kommenttiDto.kommentti());
+    return service.add(user, kommenttiDto.artikkeliErc(), kommenttiDto.kommentti());
   }
 
   @DeleteMapping("/{id}")

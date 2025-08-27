@@ -23,7 +23,7 @@ public final class ArtikkelinKommenttiMapper {
         ? null
         : new ArtikkelinKommenttiDto(
             entity.getId(),
-            entity.getArtikkeliId(),
+            entity.getArtikkeliErc(),
             Optional.ofNullable(entity.getOhjaaja()).map(Ohjaaja::getId).orElse(null),
             entity.getKommentti(),
             entity.getLuotu());

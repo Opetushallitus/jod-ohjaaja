@@ -21,5 +21,5 @@ public interface OhjaajanSuosikkiRepository extends JpaRepository<OhjaajanSuosik
 
   List<OhjaajanSuosikki> findByOhjaaja(Ohjaaja ohjaaja);
 
-  Optional<OhjaajanSuosikki> findByOhjaajaAndArtikkeliId(Ohjaaja ohjaaja, Long artikkeliId);
+  Optional<OhjaajanSuosikki> findByOhjaajaAndArtikkeliErc(Ohjaaja ohjaaja, String artikkeliErc);
 }

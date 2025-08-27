@@ -17,5 +17,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ArtikkelinKommenttiRepository extends JpaRepository<ArtikkelinKommentti, UUID> {
 
-  Page<ArtikkelinKommentti> findByArtikkeliId(Long artikkeliId, Pageable pageable);
+  Page<ArtikkelinKommentti> findByArtikkeliErc(String artikkeliErc, Pageable pageable);
 }

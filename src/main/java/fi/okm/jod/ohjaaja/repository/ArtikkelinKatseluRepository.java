@@ -29,21 +29,21 @@ public interface ArtikkelinKatseluRepository
   @Query(
       value =
           """
-              INSERT INTO artikkelin_katselu (artikkeli_id, paiva, maara)
-              VALUES (:artikkeliId, :paiva, 1)
-              ON CONFLICT (artikkeli_id, paiva)
+              INSERT INTO artikkelin_katselu (artikkeli_erc, paiva, maara)
+              VALUES (:artikkeliErc, :paiva, 1)
+              ON CONFLICT (artikkeli_erc, paiva)
               DO UPDATE SET maara = artikkelin_katselu.maara + 1
               """,
       nativeQuery = true)
-  void upsertKatselu(Long artikkeliId, LocalDate paiva);
+  void upsertKatselu(String artikkeliErc, LocalDate paiva);
 
   @Query(
       """
-      SELECT ak.artikkeliId AS artikkeliId, SUM(ak.maara) AS summa
+      SELECT ak.artikkeliErc AS artikkeliErc, SUM(ak.maara) AS summa
       FROM ArtikkelinKatselu ak
-      WHERE (:artikkeliIds IS NULL OR ak.artikkeliId IN :artikkeliIds)
-      GROUP BY ak.artikkeliId
+      WHERE (:artikkeliErcs IS NULL OR ak.artikkeliErc IN :artikkeliErcs)
+      GROUP BY ak.artikkeliErc
       """)
   Page<SummaPerArtikkeli> findSumKatselut(
-      @Nullable Collection<Long> artikkeliIds, Pageable pageable);
+      @Nullable Collection<String> artikkeliErcs, Pageable pageable);
 }

@@ -13,4 +13,4 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record ArtikkelinKommenttiExportDto(
-    UUID id, Instant luotu, long artikkeliId, String kommentti) {}
+    UUID id, Instant luotu, String artikkeliErc, String kommentti) {}

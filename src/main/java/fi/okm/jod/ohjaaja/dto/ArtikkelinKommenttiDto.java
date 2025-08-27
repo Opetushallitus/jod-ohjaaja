@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public record ArtikkelinKommenttiDto(
     @Null(groups = Add.class) @Schema(accessMode = Schema.AccessMode.READ_ONLY) UUID id,
-    @NotNull long artikkeliId,
+    @NotNull String artikkeliErc,
     @Null(groups = Add.class) @Schema(accessMode = Schema.AccessMode.READ_ONLY) UUID ohjaajaId,
     @NotNull @NotBlank @Size(max = 2000) String kommentti,
     @Null(groups = Add.class) @Schema(accessMode = Schema.AccessMode.READ_ONLY) Instant luotu) {}

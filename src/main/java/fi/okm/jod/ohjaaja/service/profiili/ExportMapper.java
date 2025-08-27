@@ -43,7 +43,8 @@ public final class ExportMapper {
   public static OhjaajanSuosikkiExportDto mapOhjaajanSuosikki(OhjaajanSuosikki entity) {
     return entity == null
         ? null
-        : new OhjaajanSuosikkiExportDto(entity.getId(), entity.getLuotu(), entity.getArtikkeliId());
+        : new OhjaajanSuosikkiExportDto(
+            entity.getId(), entity.getLuotu(), entity.getArtikkeliErc());
   }
 
   public static OhjaajanKiinnostusExportDto mapOhjaajanKiinnostus(OhjaajanKiinnostus entity) {
@@ -57,6 +58,6 @@ public final class ExportMapper {
     return entity == null
         ? null
         : new ArtikkelinKommenttiExportDto(
-            entity.getId(), entity.getLuotu(), entity.getArtikkeliId(), entity.getKommentti());
+            entity.getId(), entity.getLuotu(), entity.getArtikkeliErc(), entity.getKommentti());
   }
 }

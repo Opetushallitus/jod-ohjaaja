@@ -61,28 +61,31 @@ class ArtikkelinKommenttiControllerTest {
   void findAllArtikkelinKommentitReturnsPagedComments() throws Exception {
     UUID kommenttiId = UUID.randomUUID();
     var kommenttiDto =
-        new ArtikkelinKommenttiDto(kommenttiId, 1L, UUID.randomUUID(), "Kommentti", Instant.now());
+        new ArtikkelinKommenttiDto(
+            kommenttiId, "external-reference-code", UUID.randomUUID(), "Kommentti", Instant.now());
     var sivuDto = new SivuDto<>(List.of(kommenttiDto), 1, 1);
 
-    when(service.findByArtikkeliId(eq(1L), any(PageRequest.class))).thenReturn(sivuDto);
+    when(service.findByArtikkeliErc(eq("external-reference-code"), any(PageRequest.class)))
+        .thenReturn(sivuDto);
 
     mockMvc
         .perform(
             get("/api/artikkeli/kommentit")
-                .param("artikkeliId", "1")
+                .param("artikkeliErc", "external-reference-code")
                 .param("sivu", "0")
                 .param("koko", "10")
                 .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sisalto[0].id").value(kommenttiId.toString()))
-        .andExpect(jsonPath("$.sisalto[0].artikkeliId").value(1))
+        .andExpect(jsonPath("$.sisalto[0].artikkeliErc").value("external-reference-code"))
         .andExpect(jsonPath("$.sisalto[0].kommentti").value("Kommentti"));
   }
 
   @Test
   @WithUserDetails("test")
   void createArtikkelinKommenttiSucceeds() throws Exception {
-    var kommenttiDto = new ArtikkelinKommenttiDto(null, 1L, null, "Uusi kommentti", null);
+    var kommenttiDto =
+        new ArtikkelinKommenttiDto(null, "external-reference-code", null, "Uusi kommentti", null);
 
     mockMvc
         .perform(
@@ -92,13 +95,13 @@ class ArtikkelinKommenttiControllerTest {
                 .with(csrf()))
         .andExpect(status().isOk());
 
-    verify(service).add(any(JodUser.class), eq(1L), eq("Uusi kommentti"));
+    verify(service).add(any(JodUser.class), eq("external-reference-code"), eq("Uusi kommentti"));
   }
 
   @Test
   @WithUserDetails("test")
   void createArtikkelinKommenttiFailsWithInvalidData() throws Exception {
-    var invalidKommenttiDto = new ArtikkelinKommenttiDto(null, 0, null, "", null);
+    var invalidKommenttiDto = new ArtikkelinKommenttiDto(null, null, null, "", null);
 
     mockMvc
         .perform(
@@ -124,7 +127,8 @@ class ArtikkelinKommenttiControllerTest {
   @Test
   @WithAnonymousUser
   void unauthenticatedUserCannotCreateEndpoint() throws Exception {
-    var kommenttiDto = new ArtikkelinKommenttiDto(null, 1L, null, "Uusi kommentti", null);
+    var kommenttiDto =
+        new ArtikkelinKommenttiDto(null, "external-reference-code", null, "Uusi kommentti", null);
     mockMvc
         .perform(
             post("/api/artikkeli/kommentit")

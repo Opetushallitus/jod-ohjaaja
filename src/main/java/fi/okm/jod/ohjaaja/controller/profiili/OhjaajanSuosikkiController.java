@@ -40,7 +40,7 @@ public class OhjaajanSuosikkiController {
   @Operation(summary = "Add a new Ohjaaja's suosikki")
   UUID add(
       @AuthenticationPrincipal JodUser user, @Validated(Add.class) @RequestBody SuosikkiDto dto) {
-    return service.add(user, dto.artikkeliId());
+    return service.add(user, dto.artikkeliErc());
   }
 
   @DeleteMapping

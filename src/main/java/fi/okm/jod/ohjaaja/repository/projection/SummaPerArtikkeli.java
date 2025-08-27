@@ -10,7 +10,7 @@
 package fi.okm.jod.ohjaaja.repository.projection;
 
 public interface SummaPerArtikkeli {
-  long getArtikkeliId();
+  String getArtikkeliErc();
 
   long getSumma();
 }

@@ -21,7 +21,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
-@Table(indexes = {@Index(columnList = "ohjaaja_id"), @Index(columnList = "artikkeli_id")})
+@Table(indexes = {@Index(columnList = "ohjaaja_id"), @Index(columnList = "artikkeli_erc")})
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArtikkelinKommentti {
@@ -35,8 +35,8 @@ public class ArtikkelinKommentti {
   @OnDelete(action = OnDeleteAction.SET_NULL)
   private Ohjaaja ohjaaja;
 
-  @Column(updatable = false, nullable = false)
-  private Long artikkeliId;
+  @Column(name = "artikkeli_erc", updatable = false, nullable = false)
+  private String artikkeliErc;
 
   @Column(updatable = false, nullable = false)
   private Instant luotu;
@@ -47,9 +47,9 @@ public class ArtikkelinKommentti {
   @OneToMany(mappedBy = "artikkelinKommentti", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   private Set<ArtikkelinKommentinIlmianto> ilmiannot;
 
-  public ArtikkelinKommentti(Ohjaaja ohjaaja, Long artikkeliId, String kommentti) {
+  public ArtikkelinKommentti(Ohjaaja ohjaaja, String artikkeliErc, String kommentti) {
     this.ohjaaja = ohjaaja;
-    this.artikkeliId = artikkeliId;
+    this.artikkeliErc = artikkeliErc;
     this.kommentti = kommentti;
     this.luotu = Instant.now();
   }

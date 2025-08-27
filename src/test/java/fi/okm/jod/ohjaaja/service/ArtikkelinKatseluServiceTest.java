@@ -31,13 +31,13 @@ class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
 
   @Test
   void shouldAddOnlyArtikkelinKatseluWhenUserIsNull() {
-    var artikkeliId = 1L;
-    service.add(null, artikkeliId);
+    final var artikkeliErc = "external-reference-code";
+    service.add(null, artikkeliErc);
 
     var artikkelinKatselut = artikkelinKatseluRepository.findAll();
     assertEquals(1, artikkelinKatselut.size());
     var katselu = artikkelinKatselut.getFirst();
-    assertEquals(1L, katselu.getArtikkeliId());
+    assertEquals(artikkeliErc, katselu.getArtikkeliErc());
     assertEquals(1, katselu.getMaara());
     assertEquals(LocalDate.now(), katselu.getPaiva());
 
@@ -47,120 +47,121 @@ class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
 
   @Test
   void shouldAddArtikkelinKatseluAndViimeksiKatseltuWhenUserIsLoggedIn() {
-    var artikkeliId = 1L;
-    service.add(user, artikkeliId);
+    final var artikkeliErc = "external-reference-code";
+    service.add(user, artikkeliErc);
 
     var artikkelinKatselut = artikkelinKatseluRepository.findAll();
     assertEquals(1, artikkelinKatselut.size());
     var katselu = artikkelinKatselut.getFirst();
-    assertEquals(1L, katselu.getArtikkeliId());
+    assertEquals(artikkeliErc, katselu.getArtikkeliErc());
     assertEquals(1, katselu.getMaara());
     assertEquals(LocalDate.now(), katselu.getPaiva());
 
     var viimeksiKatsellut =
-        viimeksiKatseltuArtikkeliRepository.findByArtikkeliIdAndOhjaajaId(
-            artikkeliId, user.getId());
+        viimeksiKatseltuArtikkeliRepository.findByArtikkeliErcAndOhjaajaId(
+            artikkeliErc, user.getId());
     assertTrue(viimeksiKatsellut.isPresent());
-    assertEquals(artikkeliId, viimeksiKatsellut.get().getArtikkeliId());
+    assertEquals(artikkeliErc, viimeksiKatsellut.get().getArtikkeliErc());
     assertEquals(user.getId(), viimeksiKatsellut.get().getOhjaajaId());
     assertNotNull(viimeksiKatsellut.get().getViimeksiKatseltu());
   }
 
   @Test
-  void shouldIncreaseMaaraWhenArtikkeliIdAlreadyExists() {
-    var artikkeliId = 1L;
-    service.add(user, artikkeliId);
-    service.add(user, artikkeliId);
+  void shouldIncreaseMaaraWhenartikkeliErcAlreadyExists() {
+    final var artikkeliErc = "external-reference-code";
+    service.add(user, artikkeliErc);
+    service.add(user, artikkeliErc);
 
     var artikkelinKatselut = artikkelinKatseluRepository.findAll();
     assertEquals(1, artikkelinKatselut.size());
     var katselu = artikkelinKatselut.getFirst();
-    assertEquals(artikkeliId, katselu.getArtikkeliId());
+    assertEquals(artikkeliErc, katselu.getArtikkeliErc());
     assertEquals(2, katselu.getMaara());
   }
 
   @Test
-  void shouldNotAddArtikkelinKatseluWhenArtikkeliIdIsNull() {
+  void shouldNotAddArtikkelinKatseluWhenartikkeliErcIsNull() {
     assertThrows(IllegalArgumentException.class, () -> service.add(null, null));
   }
 
   @Test
   void shouldReturnEmptySetWhenNoArtikkelinKatseluExists() {
-    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+    var result = service.findMostRecentViewedArtikkeliErcsByUser(user, Pageable.ofSize(20));
     assertEquals(0, result.maara());
   }
 
   @Test
-  void shouldRetrieveMostRecentViewedArtikkeliId() {
+  void shouldRetrieveMostRecentViewedartikkeliErc() {
 
-    var artikkeliId = 1L;
-    service.add(user, artikkeliId);
+    final var artikkeliErc = "external-reference-code";
+    service.add(user, artikkeliErc);
 
-    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+    var result = service.findMostRecentViewedArtikkeliErcsByUser(user, Pageable.ofSize(20));
     assertEquals(1, result.maara());
-    assertEquals(1L, result.sisalto().getFirst());
+    assertEquals(artikkeliErc, result.sisalto().getFirst());
   }
 
   @Test
-  void shouldReturnMostRecentArtikkeliIdsInOrder() {
-    var artikkeliId1 = 1L;
-    var artikkeliId2 = 2L;
-    var artikkeliId3 = 3L;
+  void shouldReturnMostRecentartikkeliErcsInOrder() {
+    final var artikkeliErc1 = "external-reference-code1";
+    final var artikkeliErc2 = "external-reference-code2";
+    final var artikkeliErc3 = "external-reference-code3";
 
-    service.add(user, artikkeliId1);
-    service.add(user, artikkeliId2);
-    service.add(user, artikkeliId3);
-    service.add(user, artikkeliId2);
+    service.add(user, artikkeliErc1);
+    service.add(user, artikkeliErc2);
+    service.add(user, artikkeliErc3);
+    service.add(user, artikkeliErc2);
 
-    var result = service.findMostRecentViewedArtikkeliIdsByUser(user, Pageable.ofSize(20));
+    var result = service.findMostRecentViewedArtikkeliErcsByUser(user, Pageable.ofSize(20));
 
     assertEquals(3, result.maara());
-    assertEquals(artikkeliId2, result.sisalto().getFirst());
-    assertEquals(artikkeliId3, result.sisalto().get(1));
-    assertEquals(artikkeliId1, result.sisalto().get(2));
+    assertEquals(artikkeliErc2, result.sisalto().getFirst());
+    assertEquals(artikkeliErc3, result.sisalto().get(1));
+    assertEquals(artikkeliErc1, result.sisalto().get(2));
   }
 
   @Test
-  void shouldReturnMostViewedArtikkeliIds() {
-    var artikkeliId1 = 1L;
-    var artikkeliId2 = 2L;
-    var artikkeliId3 = 3L;
+  void shouldReturnMostViewedartikkeliErcs() {
+    final var artikkeliErc1 = "external-reference-code1";
+    final var artikkeliErc2 = "external-reference-code2";
+    final var artikkeliErc3 = "external-reference-code3";
 
-    service.add(user, artikkeliId1);
-    service.add(user, artikkeliId2);
-    service.add(user, artikkeliId3);
-    service.add(user, artikkeliId2);
-    service.add(user, artikkeliId2);
-    service.add(user, artikkeliId1);
+    service.add(user, artikkeliErc1);
+    service.add(user, artikkeliErc2);
+    service.add(user, artikkeliErc3);
+    service.add(user, artikkeliErc2);
+    service.add(user, artikkeliErc2);
+    service.add(user, artikkeliErc1);
 
     var pageable = PageRequest.of(0, 12, Sort.by(Sort.Direction.DESC, "summa"));
 
-    var result = service.findMostViewedArtikkeliIds(null, pageable);
+    var result = service.findMostViewedArtikkeliErcs(null, pageable);
 
     assertEquals(3, result.maara());
-    assertEquals(artikkeliId2, result.sisalto().getFirst());
-    assertEquals(artikkeliId1, result.sisalto().get(1));
-    assertEquals(artikkeliId3, result.sisalto().get(2));
+    assertEquals(artikkeliErc2, result.sisalto().getFirst());
+    assertEquals(artikkeliErc1, result.sisalto().get(1));
+    assertEquals(artikkeliErc3, result.sisalto().get(2));
   }
 
   @Test
-  void shouldReturnMostViewedArtikkeliIdsFilteredByIds() {
-    var artikkeliId1 = 1L;
-    var artikkeliId2 = 2L;
-    var artikkeliId3 = 3L;
+  void shouldReturnMostViewedartikkeliErcsFilteredByIds() {
+    final var artikkeliErc1 = "external-reference-code1";
+    final var artikkeliErc2 = "external-reference-code2";
+    final var artikkeliErc3 = "external-reference-code3";
 
-    service.add(null, artikkeliId1);
-    service.add(null, artikkeliId2);
-    service.add(null, artikkeliId3);
-    service.add(null, artikkeliId2);
+    service.add(null, artikkeliErc1);
+    service.add(null, artikkeliErc2);
+    service.add(null, artikkeliErc3);
+    service.add(null, artikkeliErc2);
 
     var pageable = PageRequest.of(0, 12, Sort.by(Sort.Direction.DESC, "summa"));
 
-    var result = service.findMostViewedArtikkeliIds(List.of(artikkeliId1, artikkeliId2), pageable);
+    var result =
+        service.findMostViewedArtikkeliErcs(List.of(artikkeliErc1, artikkeliErc2), pageable);
 
     assertEquals(2, result.maara());
-    assertEquals(artikkeliId2, result.sisalto().getFirst());
-    assertEquals(artikkeliId1, result.sisalto().get(1));
+    assertEquals(artikkeliErc2, result.sisalto().getFirst());
+    assertEquals(artikkeliErc1, result.sisalto().get(1));
   }
 
   @Test
@@ -168,7 +169,7 @@ class ArtikkelinKatseluServiceTest extends AbstractServiceTest {
 
     var pageable = PageRequest.of(0, 12, Sort.by(Sort.Direction.DESC, "summa"));
 
-    var result = service.findMostViewedArtikkeliIds(null, pageable);
+    var result = service.findMostViewedArtikkeliErcs(null, pageable);
 
     assertEquals(0, result.maara());
     assertTrue(result.sisalto().isEmpty());
