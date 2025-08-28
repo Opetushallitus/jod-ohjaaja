@@ -9,6 +9,8 @@
 
 package fi.okm.jod.ohjaaja.config;
 
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
+import fi.okm.jod.ohjaaja.domain.JodUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -30,6 +32,14 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
   public void onAuthenticationSuccess(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     String callback = null;
+
+    if (authentication != null && authentication.getPrincipal() instanceof JodUser user) {
+      log.atInfo()
+          .addMarker(LogMarker.AUDIT)
+          .addKeyValue("userId", user.getId())
+          .log("User logged in");
+    }
+
     if (request.getSession(false) instanceof HttpSession s) {
       callback = (String) s.getAttribute(SessionLoginAttribute.CALLBACK.getKey());
 

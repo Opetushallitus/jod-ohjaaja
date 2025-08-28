@@ -40,6 +40,8 @@ spring:
     aws:
       parameterstore:
         enabled: false
+      secretsmanager:
+        enabled: false
 
 server:
   compression:
@@ -70,9 +72,8 @@ springdoc:
 
 logging:
   level:
+    root: INFO
     fi.okm.jod: DEBUG
-    sql: DEBUG
-    #org.hibernate.orm.jdbc.batch: TRACE
     org:
       springframework:
         web:
