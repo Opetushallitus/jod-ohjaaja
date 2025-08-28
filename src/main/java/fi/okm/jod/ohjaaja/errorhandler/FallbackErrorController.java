@@ -9,8 +9,6 @@
 
 package fi.okm.jod.ohjaaja.errorhandler;
 
-import static net.logstash.logback.argument.StructuredArguments.kv;
-
 import fi.okm.jod.ohjaaja.errorhandler.ErrorInfo.ErrorCode;
 import io.micrometer.tracing.Tracer;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -77,12 +75,14 @@ public class FallbackErrorController implements ErrorController {
 
     if (status.is5xxServerError()) {
       errorCode = ErrorCode.UNSPECIFIED_ERROR;
-      log.error("Request failed: {}", kv("status", status.value()), exception);
+      log.atError()
+          .addKeyValue("status", status.value())
+          .log("Request failed due to server error", exception);
     } else {
-      log.warn(
-          "Request failed: {}, {}",
-          kv("status", status.value()),
-          kv("reason", exception == null ? null : exception.toString()));
+      log.atWarn()
+          .addKeyValue("status", status.value())
+          .addKeyValue("reason", exception == null ? null : exception.toString())
+          .log("Request failed due to client error");
     }
 
     return ResponseEntity.status(status)

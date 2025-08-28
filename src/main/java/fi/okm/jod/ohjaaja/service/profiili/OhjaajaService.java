@@ -9,6 +9,7 @@
 
 package fi.okm.jod.ohjaaja.service.profiili;
 
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.profiili.OhjaajaDto;
 import fi.okm.jod.ohjaaja.dto.profiili.export.OhjaajaExportDto;
@@ -16,12 +17,14 @@ import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import fi.okm.jod.ohjaaja.service.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class OhjaajaService {
   private final OhjaajaRepository ohjaajat;
 
@@ -39,10 +42,18 @@ public class OhjaajaService {
   public void delete(JodUser user) {
     ohjaajat.deleteById(user.getId());
     ohjaajat.removeId(user.getId());
+    log.atInfo()
+        .addMarker(LogMarker.AUDIT)
+        .addKeyValue("userId", user.getId())
+        .log("User profile deleted");
   }
 
   public OhjaajaExportDto export(JodUser user) {
     var ohjaaja = getOhjaaja(user);
+    log.atInfo()
+        .addMarker(LogMarker.AUDIT)
+        .addKeyValue("userId", user.getId())
+        .log("User profile exported");
     return ExportMapper.mapOhjaaja(ohjaaja);
   }
 

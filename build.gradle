@@ -67,6 +67,7 @@ dependencies {
 
   implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0')
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+  implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
 
   implementation 'org.springframework.security:spring-security-saml2-service-provider'
 
@@ -84,9 +85,6 @@ dependencies {
 
   implementation "org.flywaydb:flyway-core"
   implementation "org.flywaydb:flyway-database-postgresql"
-
-  // Logging in JSON format
-  implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
 
   // Caffeine cache implementation
   implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'

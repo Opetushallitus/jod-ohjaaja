@@ -9,14 +9,17 @@
 
 package fi.okm.jod.ohjaaja.config;
 
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.service.profiili.OhjaajaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ProfileDeletionHandler implements LogoutHandler {
   private final OhjaajaService ohjaajaService;
@@ -24,9 +27,15 @@ public class ProfileDeletionHandler implements LogoutHandler {
   @Override
   public void logout(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-    if ("true".equals(request.getParameter("deletion"))) {
-      var principal = (JodUser) authentication.getPrincipal();
-      ohjaajaService.delete(principal);
+
+    if (authentication != null && authentication.getPrincipal() instanceof JodUser user) {
+      if ("true".equals(request.getParameter("deletion"))) {
+        ohjaajaService.delete(user);
+      }
+      log.atInfo()
+          .addMarker(LogMarker.AUDIT)
+          .addKeyValue("userId", user.getId())
+          .log("User logged out");
     }
   }
 }
