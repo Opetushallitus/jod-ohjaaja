@@ -117,7 +117,12 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
   @WithMockUser
   void cantDeleteCommentByNonOwner() {
     var artikkeliErc = "external-reference-code";
-    var otherUser = new TestJodUser(entityManager.persist(new Ohjaaja(UUID.randomUUID())).getId());
+    var otherUser =
+        new TestJodUser(
+            entityManager
+                .persist(
+                    new Ohjaaja(ohjaajaRepository.findIdByHenkiloId("TEST:" + UUID.randomUUID())))
+                .getId());
     var testComment1Id = service.add(otherUser, artikkeliErc, "Test comment 1").id();
     var testComment2Id = service.add(user, artikkeliErc, "Test comment 2").id();
 

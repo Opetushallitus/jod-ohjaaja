@@ -1,3 +1,9 @@
+buildscript {
+  dependencies {
+    classpath("org.flywaydb:flyway-database-postgresql:11.11.2")
+  }
+}
+
 plugins {
   id 'java'
   id 'jacoco'
@@ -13,6 +19,7 @@ plugins {
 
   id "com.github.ben-manes.versions" version "0.52.0"
   id 'org.cyclonedx.bom' version '2.3.1'
+  id "org.flywaydb.flyway" version "11.10.1"
 }
 
 group = 'fi.okm.jod'
@@ -38,6 +45,7 @@ ext {
   bouncycastleVersion = "1.81"
   springdocVersion = "2.8.9"
   setProperty("flyway.version", "11.10.4")
+  setProperty("flyway.version", "11.11.2")
 }
 
 configurations {
@@ -301,3 +309,33 @@ tasks.register("generateSchemaDocs", JavaExec) {
     ext.process.destroy()
   }
 }
+
+flyway {
+  defaultSchema = 'ohjaaja'
+  schemas = ['ohjaaja']
+}
+
+tasks.register('validateFlywayMigrationNames') {
+  description = 'Validates that Flyway migration file names follow the pattern V<YYYYMMDD>.<issueid>__description.sql'
+  group = 'verification'
+
+  def migrationDir = file('src/main/resources/db/migration')
+  inputs.dir(migrationDir)
+
+  doLast {
+    def pattern = ~/(R__\d{3}_.*.sql)|(?U:^[VB]\d{4}[01]\d[0-3]\d(\.\d+)+__\w+\.sql)$/
+
+    if (migrationDir.exists()) {
+      migrationDir.listFiles().each { file ->
+        if (file.isFile() && file.name.endsWith('.sql')) {
+          if (!pattern.matcher(file.name).matches()) {
+            throw new GradleException("Invalid migration file name: ${file.name}")
+          }
+        }
+      }
+    }
+  }
+}
+
+check.dependsOn validateFlywayMigrationNames
+test.shouldRunAfter validateFlywayMigrationNames

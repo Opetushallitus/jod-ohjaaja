@@ -10,6 +10,7 @@
 package fi.okm.jod.ohjaaja.service;
 
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import fi.okm.jod.ohjaaja.testutil.TestJodUser;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,8 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class AbstractServiceTest {
 
+  @Autowired protected OhjaajaRepository ohjaajaRepository;
+
   @Container @ServiceConnection
   static PostgreSQLContainer<?> postgreSQLContainer =
       new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
@@ -40,7 +43,8 @@ public abstract class AbstractServiceTest {
 
   @BeforeEach
   public void setUpUser() {
-    this.user = new TestJodUser(entityManager.persist(new Ohjaaja(UUID.randomUUID())).getId());
+    var ohjaaja = new Ohjaaja(ohjaajaRepository.findIdByHenkiloId("TEST:" + UUID.randomUUID()));
+    this.user = new TestJodUser(entityManager.persist(ohjaaja).getId());
   }
 
   /** Simulates commit by flushing and clearing the entity manager. */

@@ -1,11 +1,11 @@
 -- mock tunnistus schema for tests
-CREATE SCHEMA IF NOT EXISTS tunnistus
-;;;
+CREATE SCHEMA IF NOT EXISTS tunnistus;
+
 CREATE TABLE IF NOT EXISTS tunnistus.henkilo (
-  ohjaaja_id  UUID PRIMARY KEY,
-  henkilo_id VARCHAR(300) NOT NULL UNIQUE
-)
-;;;
+   ohjaaja_id  UUID PRIMARY KEY,
+   henkilo_id VARCHAR(300) NOT NULL UNIQUE
+);
+
 CREATE OR REPLACE FUNCTION tunnistus.generate_ohjaaja_id(henkilo_id VARCHAR(300)) RETURNS UUID AS
 $$
 DECLARE
@@ -20,13 +20,13 @@ BEGIN
   END IF;
   RETURN id;
 END
-$$ LANGUAGE PLPGSQL
-;;;
+$$ LANGUAGE PLPGSQL;
+
 CREATE OR REPLACE FUNCTION tunnistus.remove_ohjaaja_id(ohjaaja_id UUID) RETURNS UUID AS
 $$
 DELETE
 FROM tunnistus.henkilo
 WHERE ohjaaja_id = $1
 RETURNING ohjaaja_id
-$$ LANGUAGE SQL
-;;;
+$$ LANGUAGE SQL;
+
