@@ -6,9 +6,8 @@ spring:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: "create" # FIXME: Just for early development without migrations
+      ddl-auto: validate
     open-in-view: false
-    defer-datasource-initialization: true # FIXME: Just for early development without migrations
     properties:
       hibernate:
         jdbc:
@@ -22,16 +21,19 @@ spring:
   mvc:
     log-resolved-exception: false
   flyway:
-    enabled: false
+    enabled: true
+    default-schema: ohjaaja
+    schemas: ohjaaja
+    group: true
+    baseline-on-migrate: true
+    out-of-order: true
+    baseline-version: "20250828.1939"
+    baseline-description: baseline
   session:
     timeout: 30m
     redis:
       repository-type: default
       namespace: spring:session:ohjaaja
-  sql:
-    init:
-      mode: always # FIXME: Just for early development without migration
-      separator: ";;;"
   cache:
     type: caffeine
     caffeine:

@@ -30,3 +30,11 @@ as a build tool.
 * Code style is enforced using Spotless and Checkstyle (based on Google Java Style).
   * You can format the code with `./gradlew spotlessApply`.
   * If using IntelliJ IDEA, the Checkstyle-IDEA and google-java-format plugins are recommended.
+
+### Database migrations
+
+The database migrations are managed with Flyway, located in the
+`src/main/resources/db/migration` directory. The migrations should be named in the format
+`V<yyymmdd>.<id>__<description>.sql`, where `<id>` is the Jira issue number of the migration, and
+`<description>` is a short description of the migration. For example,
+`V20250708.1234__add_new_table.sql`.

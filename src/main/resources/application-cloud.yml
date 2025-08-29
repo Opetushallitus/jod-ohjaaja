@@ -12,6 +12,9 @@ spring:
           strategy: refresh
   datasource:
     type: fi.okm.jod.ohjaaja.config.datasource.RdsIamAuthHikariDataSource
+  jpa:
+    hibernate:
+      ddl-auto: none
   security:
     oauth2:
       resourceserver:
