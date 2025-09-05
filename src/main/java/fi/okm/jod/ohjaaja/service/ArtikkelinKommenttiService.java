@@ -25,6 +25,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
 import org.jsoup.safety.Safelist;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,8 @@ public class ArtikkelinKommenttiService {
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public ArtikkelinKommenttiDto add(
       @NotNull JodUser jodUser, @NotNull String artikkeliErc, @NotNull String kommentti) {
-    var cleanedKommentti = clean(kommentti, "", Safelist.relaxed(), outputSettings);
+    var cleanedKommentti =
+        Parser.unescapeEntities(clean(kommentti, "", Safelist.relaxed(), outputSettings), false);
     var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
     var artikkelinKommentti = new ArtikkelinKommentti(ohjaaja, artikkeliErc, cleanedKommentti);
     return ArtikkelinKommenttiMapper.mapArtikkelinKommentti(
