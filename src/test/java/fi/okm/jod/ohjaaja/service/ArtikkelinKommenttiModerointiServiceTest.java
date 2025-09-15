@@ -64,6 +64,7 @@ class ArtikkelinKommenttiModerointiServiceTest extends AbstractServiceTest {
         0,
         ilmiannot.getFirst().getKirjautuneetMaara(),
         "Expected ilmianto to have no logged-in reports");
+    assertEquals("external-reference-code", ilmiannot.getFirst().getArtikkeliErc());
   }
 
   @Test
@@ -91,5 +92,6 @@ class ArtikkelinKommenttiModerointiServiceTest extends AbstractServiceTest {
         1,
         ilmiannot.getFirst().getKirjautuneetMaara(),
         "Expected ilmianto to have no logged-in reports");
+    assertEquals("external-reference-code", ilmiannot.getFirst().getArtikkeliErc());
   }
 }
