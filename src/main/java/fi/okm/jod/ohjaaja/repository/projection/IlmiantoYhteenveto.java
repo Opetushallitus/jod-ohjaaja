@@ -19,6 +19,8 @@ public interface IlmiantoYhteenveto {
 
   Instant getKommentinAika();
 
+  String getArtikkeliErc();
+
   int getKirjautuneetMaara();
 
   int getAnonyymitMaara();

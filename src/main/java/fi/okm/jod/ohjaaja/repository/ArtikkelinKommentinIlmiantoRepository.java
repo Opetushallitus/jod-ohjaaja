@@ -43,6 +43,7 @@ public interface ArtikkelinKommentinIlmiantoRepository
               k.id  AS artikkelinKommenttiId,
               k.kommentti AS kommentti,
               k.luotu AS kommentinAika,
+              k.artikkeli_erc AS artikkeliErc,
               SUM(CASE WHEN a.tunnistautunut THEN a.maara ELSE 0 END) AS kirjautuneetMaara,
               SUM(CASE WHEN NOT a.tunnistautunut THEN a.maara ELSE 0 END) AS anonyymitMaara,
               MAX(a.viimeksi_ilmiannettu) AS viimeisinIlmianto
