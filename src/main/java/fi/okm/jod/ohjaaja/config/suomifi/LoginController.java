@@ -12,6 +12,7 @@ package fi.okm.jod.ohjaaja.config.suomifi;
 import static fi.okm.jod.ohjaaja.config.SessionLoginAttribute.CALLBACK;
 import static fi.okm.jod.ohjaaja.config.SessionLoginAttribute.LANG;
 
+import fi.okm.jod.ohjaaja.domain.Kieli;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,14 +35,14 @@ class LoginController {
 
   @GetMapping("/login")
   void login(
-      @RequestParam(required = false) String lang,
+      @RequestParam(required = false) Kieli lang,
       @RequestParam(required = false) URI callback,
       HttpServletRequest request,
       HttpServletResponse response)
       throws IOException {
 
-    if (lang != null && !lang.isEmpty()) {
-      request.getSession().setAttribute(LANG.getKey(), lang);
+    if (lang != null) {
+      request.getSession().setAttribute(LANG.getKey(), lang.toString());
     }
     if (callback != null && callback.getPath() != null) {
       request.getSession().setAttribute(CALLBACK.getKey(), callback.getPath());
