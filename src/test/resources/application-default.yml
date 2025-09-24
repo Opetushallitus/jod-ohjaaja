@@ -3,8 +3,14 @@ logging:
     root: INFO
     fi.okm.jod: DEBUG
 spring:
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.sqs.SqsAutoConfiguration
   datasource:
     hikari:
       maximum-pool-size: 3
       schema: ohjaaja
+jod:
+  feedback:
+    queue-arn: "test-feedback-queue"
 
