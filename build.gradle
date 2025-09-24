@@ -76,6 +76,7 @@ dependencies {
   implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0')
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
+  implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
   implementation 'org.springframework.security:spring-security-saml2-service-provider'
 
