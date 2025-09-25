@@ -21,18 +21,30 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ArtikkelinKommentinIlmiantoRepository
     extends JpaRepository<ArtikkelinKommentinIlmianto, ArtikkelinKommentinIlmiantoId> {
-  @Modifying
+
   @Transactional
   @Query(
       value =
           """
-          INSERT INTO artikkelin_kommentin_ilmianto (artikkelin_kommentti_id, tunnistautunut, maara, viimeksi_ilmiannettu)
-          VALUES (:artikkelinKommenttiId, :tunnistautunut, 1, CURRENT_TIMESTAMP)
-          ON CONFLICT (artikkelin_kommentti_id, tunnistautunut)
-          DO UPDATE SET maara = artikkelin_kommentin_ilmianto.maara + 1, viimeksi_ilmiannettu = CURRENT_TIMESTAMP
+          WITH upsert AS (
+            INSERT INTO artikkelin_kommentin_ilmianto (artikkelin_kommentti_id, tunnistautunut, maara, viimeksi_ilmiannettu)
+            VALUES (:artikkelinKommenttiId, :tunnistautunut, 1, CURRENT_TIMESTAMP)
+            ON CONFLICT (artikkelin_kommentti_id, tunnistautunut)
+            DO UPDATE SET maara = artikkelin_kommentin_ilmianto.maara + 1, viimeksi_ilmiannettu = CURRENT_TIMESTAMP
+            RETURNING artikkelin_kommentti_id, maara
+          ),
+          other_sum AS (
+            SELECT SUM(maara) AS sum_maara
+            FROM artikkelin_kommentin_ilmianto
+            WHERE artikkelin_kommentti_id = :artikkelinKommenttiId
+              AND tunnistautunut != :tunnistautunut
+          )
+          SELECT COALESCE(u.maara, 0) + COALESCE(o.sum_maara, 0) AS total_maara
+          FROM upsert u
+          CROSS JOIN other_sum o
           """,
       nativeQuery = true)
-  void upsertIlmianto(UUID artikkelinKommenttiId, boolean tunnistautunut);
+  int upsertIlmianto(UUID artikkelinKommenttiId, boolean tunnistautunut);
 
   List<ArtikkelinKommentinIlmianto> findByArtikkelinKommenttiId(UUID artikkelinKommenttiId);
 

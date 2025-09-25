@@ -14,6 +14,7 @@ import static org.jsoup.Jsoup.clean;
 import fi.okm.jod.ohjaaja.annotation.FeatureRequired;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.PalauteViestiDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.FeatureFlag;
@@ -21,24 +22,36 @@ import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommenttiRepository;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.safety.Safelist;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class ArtikkelinKommenttiService {
 
+  private final PalauteKanavaService palauteKanavaService;
   private final ArtikkelinKommenttiRepository artikkelinKommentit;
   private final ArtikkelinKommentinIlmiantoRepository artikkelinKommentinIlmianto;
   private final OhjaajaRepository ohjaajat;
+
+  public ArtikkelinKommenttiService(
+      @Autowired(required = false) PalauteKanavaService palauteKanavaService,
+      ArtikkelinKommenttiRepository artikkelinKommentit,
+      ArtikkelinKommentinIlmiantoRepository artikkelinKommentinIlmianto,
+      OhjaajaRepository ohjaajat) {
+    this.palauteKanavaService = palauteKanavaService;
+    this.artikkelinKommentit = artikkelinKommentit;
+    this.artikkelinKommentinIlmianto = artikkelinKommentinIlmianto;
+    this.ohjaajat = ohjaajat;
+  }
 
   private static final Document.OutputSettings outputSettings =
       new Document.OutputSettings().prettyPrint(false);
@@ -76,6 +89,25 @@ public class ArtikkelinKommenttiService {
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public void ilmianna(UUID artikkelinKommenttiId, @Nullable JodUser jodUser) {
     boolean tunnistautunut = jodUser != null;
-    artikkelinKommentinIlmianto.upsertIlmianto(artikkelinKommenttiId, tunnistautunut);
+    var ilmiannotKpl =
+        artikkelinKommentinIlmianto.upsertIlmianto(artikkelinKommenttiId, tunnistautunut);
+    if (ilmiannotKpl == 1) {
+      var ilmiantoIlmoitusViesti =
+          new PalauteViestiDto(
+              "Asiaton kommentti",
+              "Ohjaajan osio",
+              "Ohjaajan osio",
+              null,
+              "fi",
+              "Artikkelin kommentti on saanut ensimmäisen ilmiannon. \n"
+                  + "Tarkista kommentti virkailijan käyttöliittymästä ja tarvittaessa poista se.",
+              Instant.now());
+
+      if (palauteKanavaService != null) {
+        palauteKanavaService.sendMessage(ilmiantoIlmoitusViesti);
+      } else {
+        throw new IllegalStateException("PalauteKanavaService is not available");
+      }
+    }
   }
 }

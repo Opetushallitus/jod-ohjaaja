@@ -17,14 +17,17 @@ import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.testutil.TestJodUser;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({ArtikkelinKommenttiService.class})
 class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
+  @MockitoBean private PalauteKanavaService palauteKanavaService;
   @Autowired private ArtikkelinKommenttiService service;
   @Autowired private ArtikkelinKommentinIlmiantoRepository ilmiantoRepository;
 
@@ -155,8 +158,13 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
     var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
     var result = service.add(user, artikkeliErc, commentContent);
+
     service.ilmianna(result.id(), null);
+    Mockito.verify(palauteKanavaService).sendMessage(Mockito.any());
+
     service.ilmianna(result.id(), null);
+    Mockito.verifyNoMoreInteractions(palauteKanavaService);
+
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
     assertNotNull(ilmiannot);
     assertEquals(1, ilmiannot.size());
@@ -184,8 +192,13 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
     var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
     var result = service.add(user, artikkeliErc, commentContent);
+
     service.ilmianna(result.id(), user);
+    Mockito.verify(palauteKanavaService).sendMessage(Mockito.any());
+
     service.ilmianna(result.id(), user);
+    Mockito.verifyNoMoreInteractions(palauteKanavaService);
+
     var ilmiannot = ilmiantoRepository.findByArtikkelinKommenttiId(result.id());
     assertNotNull(ilmiannot);
     assertEquals(1, ilmiannot.size());
@@ -199,7 +212,6 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
     var artikkeliErc = "external-reference-code";
     var commentContent = "Ilmianto kommentti";
     var result = service.add(user, artikkeliErc, commentContent);
-
     // Unauthenticated ilmianto
     service.ilmianna(result.id(), null);
 
