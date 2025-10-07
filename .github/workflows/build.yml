@@ -135,6 +135,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     permissions:
       id-token: write
+      contents: write
     secrets: inherit
     with:
       environment: development
@@ -148,6 +149,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     permissions:
       id-token: write
+      contents: write
     secrets: inherit
     with:
       environment: test
@@ -161,6 +163,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     permissions:
       id-token: write
+      contents: write
     secrets: inherit
     with:
       environment: production
