@@ -56,6 +56,19 @@ public class ArtikkelinKommenttiService {
   private static final Document.OutputSettings outputSettings =
       new Document.OutputSettings().prettyPrint(false);
 
+  /*
+   * List all comments with pagination
+   * Note! This method is not protected with @FeatureRequired
+   * because it is used in admin interface to list all comments for moderation purposes.
+   */
+  public SivuDto<ArtikkelinKommenttiDto> findAll(Pageable pageable) {
+    var kommentit = artikkelinKommentit.findAll(pageable);
+    return new SivuDto<>(
+        kommentit.map(ArtikkelinKommenttiMapper::mapArtikkelinKommentti).getContent(),
+        kommentit.getTotalElements(),
+        kommentit.getTotalPages());
+  }
+
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
   public ArtikkelinKommenttiDto add(
       @NotNull JodUser jodUser, @NotNull String artikkeliErc, @NotNull String kommentti) {
