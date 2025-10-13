@@ -9,12 +9,17 @@
 
 package fi.okm.jod.ohjaaja.controller;
 
+import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.repository.projection.IlmiantoYhteenveto;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKommenttiModerointiService;
+import fi.okm.jod.ohjaaja.service.ArtikkelinKommenttiService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +28,14 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "internal/moderointi/kommentit")
 public class ArtikkelinKommenttiModerointiController {
   private final ArtikkelinKommenttiModerointiService service;
+  private final ArtikkelinKommenttiService artikkelinKommenttiService;
+
+  @GetMapping
+  public SivuDto<ArtikkelinKommenttiDto> getKommentit(
+      @RequestParam int sivu, @RequestParam int koko) {
+    return artikkelinKommenttiService.findAll(
+        PageRequest.of(sivu, koko, Sort.by(Sort.Direction.DESC, "luotu")));
+  }
 
   @GetMapping("/ilmiannot")
   public List<IlmiantoYhteenveto> getIlmiannot() {
