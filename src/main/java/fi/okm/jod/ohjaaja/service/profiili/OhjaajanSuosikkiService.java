@@ -28,6 +28,7 @@ public class OhjaajanSuosikkiService {
   private final OhjaajaRepository ohjaajat;
   private final OhjaajanSuosikkiRepository suosikit;
 
+  @Transactional(readOnly = true)
   public List<SuosikkiDto> findAll(JodUser user) {
     var ohjaaja = ohjaajat.getReferenceById(user.getId());
     return suosikit.findByOhjaaja(ohjaaja).stream()

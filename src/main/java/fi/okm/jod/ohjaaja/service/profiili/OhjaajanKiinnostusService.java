@@ -28,6 +28,7 @@ public class OhjaajanKiinnostusService {
   private final OhjaajaRepository ohjaajat;
   private final OhjaajanKiinnostusRepository kiinnostukset;
 
+  @Transactional(readOnly = true)
   public List<KiinnostusDto> findAll(JodUser user) {
     var ohjaaja = ohjaajat.getReferenceById(user.getId());
     return kiinnostukset.findByOhjaaja(ohjaaja).stream()

@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OhjaajaService {
   private final OhjaajaRepository ohjaajat;
 
+  @Transactional(readOnly = true)
   public OhjaajaDto get(JodUser user) {
     var ohjaaja = getOhjaaja(user);
     return new OhjaajaDto(ohjaaja.getId(), ohjaaja.getTyoskentelyPaikka());
@@ -48,6 +49,7 @@ public class OhjaajaService {
         .log("User profile deleted");
   }
 
+  @Transactional(readOnly = true)
   public OhjaajaExportDto export(JodUser user) {
     var ohjaaja = getOhjaaja(user);
     log.atInfo()
