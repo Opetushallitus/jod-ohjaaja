@@ -12,6 +12,7 @@ package fi.okm.jod.ohjaaja.config.suomifi;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.OhjaajaRepository;
 import java.net.URI;
@@ -104,7 +105,14 @@ class ResponseTokenConverter implements Converter<ResponseToken, Saml2Authentica
     return transactionTemplate.execute(
         status -> {
           var id = ohjaajat.findIdByHenkiloId(personId);
-          return ohjaajat.findById(id).orElseGet(() -> ohjaajat.save(new Ohjaaja(id))).getId();
+          return ohjaajat
+              .findById(id)
+              .orElseGet(
+                  () -> {
+                    log.atInfo().addMarker(LogMarker.AUDIT).log("Creating new user with id {}", id);
+                    return ohjaajat.save(new Ohjaaja(id));
+                  })
+              .getId();
         });
   }
 
