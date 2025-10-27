@@ -12,6 +12,7 @@ package fi.okm.jod.ohjaaja.service;
 import static org.jsoup.Jsoup.clean;
 
 import fi.okm.jod.ohjaaja.annotation.FeatureRequired;
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
 import fi.okm.jod.ohjaaja.dto.PalauteViestiDto;
@@ -25,6 +26,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.safety.Safelist;
@@ -35,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@Slf4j
 public class ArtikkelinKommenttiService {
 
   private final PalauteKanavaService palauteKanavaService;
@@ -75,9 +78,16 @@ public class ArtikkelinKommenttiService {
     var cleanedKommentti =
         Parser.unescapeEntities(clean(kommentti, "", Safelist.relaxed(), outputSettings), false);
     var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
-    var artikkelinKommentti = new ArtikkelinKommentti(ohjaaja, artikkeliErc, cleanedKommentti);
-    return ArtikkelinKommenttiMapper.mapArtikkelinKommentti(
-        artikkelinKommentit.save(artikkelinKommentti));
+    var artikkelinKommentti =
+        ArtikkelinKommenttiMapper.mapArtikkelinKommentti(
+            artikkelinKommentit.save(
+                new ArtikkelinKommentti(ohjaaja, artikkeliErc, cleanedKommentti)));
+    log.atInfo()
+        .addMarker(LogMarker.AUDIT)
+        .addKeyValue("userId", ohjaaja.getId())
+        .addKeyValue("commentId", artikkelinKommentti.id())
+        .log("New comment added");
+    return artikkelinKommentti;
   }
 
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)
@@ -86,6 +96,11 @@ public class ArtikkelinKommenttiService {
     var artikkelinKommentti = artikkelinKommentit.getReferenceById(kommenttiId);
     if (artikkelinKommentti.getOhjaaja().getId().equals(ohjaaja.getId())) {
       artikkelinKommentit.delete(artikkelinKommentti);
+      log.atInfo()
+          .addMarker(LogMarker.AUDIT)
+          .addKeyValue("userId", ohjaaja.getId())
+          .addKeyValue("commentId", artikkelinKommentti)
+          .log("Comment deleted");
     }
   }
 

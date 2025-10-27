@@ -9,6 +9,7 @@
 
 package fi.okm.jod.ohjaaja.service.profiili;
 
+import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.profiili.KiinnostusDto;
 import fi.okm.jod.ohjaaja.entity.OhjaajanKiinnostus;
@@ -18,16 +19,19 @@ import fi.okm.jod.ohjaaja.service.NotFoundException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class OhjaajanKiinnostusService {
   private final OhjaajaRepository ohjaajat;
   private final OhjaajanKiinnostusRepository kiinnostukset;
 
+  @Transactional(readOnly = true)
   public List<KiinnostusDto> findAll(JodUser user) {
     var ohjaaja = ohjaajat.getReferenceById(user.getId());
     return kiinnostukset.findByOhjaaja(ohjaaja).stream()
@@ -40,15 +44,26 @@ public class OhjaajanKiinnostusService {
 
   public UUID add(JodUser user, long asiasanaId) {
     var ohjaaja = ohjaajat.getReferenceById(user.getId());
-    return kiinnostukset
-        .findByOhjaajaAndAsiasanaId(ohjaaja, asiasanaId)
-        .map(OhjaajanKiinnostus::getId)
-        .orElseGet(() -> kiinnostukset.save(new OhjaajanKiinnostus(asiasanaId, ohjaaja)).getId());
+    var id =
+        kiinnostukset
+            .findByOhjaajaAndAsiasanaId(ohjaaja, asiasanaId)
+            .map(OhjaajanKiinnostus::getId)
+            .orElseGet(
+                () -> kiinnostukset.save(new OhjaajanKiinnostus(asiasanaId, ohjaaja)).getId());
+    log.atInfo()
+        .addMarker(LogMarker.AUDIT)
+        .addKeyValue("userId", user.getId())
+        .log("New interest added");
+    return id;
   }
 
   public void delete(JodUser user, UUID id) {
     if (kiinnostukset.deleteByOhjaajaAndId(ohjaajat.getReferenceById(user.getId()), id) == 0) {
       throw new NotFoundException("Kiinnostus not found");
     }
+    log.atInfo()
+        .addMarker(LogMarker.AUDIT)
+        .addKeyValue("userId", user.getId())
+        .log("Interest deleted");
   }
 }
