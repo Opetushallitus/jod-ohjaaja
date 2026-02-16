@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -241,5 +242,129 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
     var nonExistentCommentId = UUID.randomUUID();
     assertThrows(
         DataIntegrityViolationException.class, () -> service.ilmianna(nonExistentCommentId, user));
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitReturnsDistinctArticles() {
+    var artikkeliErc1 = "article-1";
+    var artikkeliErc2 = "article-2";
+    var artikkeliErc3 = "article-3";
+
+    // Add multiple comments to different articles
+    service.add(user, artikkeliErc1, "Comment 1 on article 1");
+    service.add(user, artikkeliErc1, "Comment 2 on article 1");
+    service.add(user, artikkeliErc2, "Comment on article 2");
+    service.add(user, artikkeliErc3, "Comment on article 3");
+
+    var result = service.findKommentoidutArtikkelit(user, Pageable.ofSize(10));
+
+    assertNotNull(result);
+    assertEquals(3, result.maara());
+    assertTrue(result.sisalto().stream().anyMatch(dto -> dto.artikkeliErc().equals(artikkeliErc1)));
+    assertTrue(result.sisalto().stream().anyMatch(dto -> dto.artikkeliErc().equals(artikkeliErc2)));
+    assertTrue(result.sisalto().stream().anyMatch(dto -> dto.artikkeliErc().equals(artikkeliErc3)));
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitPaginationWorks() {
+    // Add comments to 5 different articles
+    for (int i = 1; i <= 5; i++) {
+      service.add(user, "article-" + i, "Comment on article " + i);
+    }
+
+    var page1 = service.findKommentoidutArtikkelit(user, PageRequest.of(0, 3));
+    var page2 = service.findKommentoidutArtikkelit(user, PageRequest.of(1, 3));
+
+    assertNotNull(page1);
+    assertEquals(5, page1.maara());
+    assertEquals(2, page1.sivuja());
+    assertEquals(3, page1.sisalto().size());
+
+    assertNotNull(page2);
+    assertEquals(5, page2.maara());
+    assertEquals(2, page2.sivuja());
+    assertEquals(2, page2.sisalto().size());
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitOnlyReturnsCurrentUsersArticles() {
+    var artikkeliErc1 = "article-1";
+    var artikkeliErc2 = "article-2";
+    var otherUser =
+        new TestJodUser(
+            entityManager
+                .persist(
+                    new Ohjaaja(ohjaajaRepository.findIdByHenkiloId("TEST:" + UUID.randomUUID())))
+                .getId());
+
+    service.add(user, artikkeliErc1, "User's comment");
+    service.add(otherUser, artikkeliErc2, "Other user's comment");
+
+    var result = service.findKommentoidutArtikkelit(user, Pageable.ofSize(10));
+
+    assertNotNull(result);
+    assertEquals(1, result.maara());
+    assertEquals(artikkeliErc1, result.sisalto().getFirst().artikkeliErc());
+    assertFalse(
+        result.sisalto().stream().anyMatch(dto -> dto.artikkeliErc().equals(artikkeliErc2)));
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitReturnsArticles() {
+    var artikkeliErc1 = "article-1";
+    var artikkeliErc2 = "article-2";
+
+    service.add(user, artikkeliErc1, "Comment 1 on article 1");
+    service.add(user, artikkeliErc1, "Comment 2 on article 1");
+    service.add(user, artikkeliErc2, "Comment on article 2");
+
+    var result = service.findKommentoidutArtikkelit(user, Pageable.ofSize(10));
+
+    assertNotNull(result);
+    assertEquals(2, result.maara());
+
+    var dto1 =
+        result.sisalto().stream().filter(d -> d.artikkeliErc().equals(artikkeliErc1)).findFirst();
+    var dto2 =
+        result.sisalto().stream().filter(d -> d.artikkeliErc().equals(artikkeliErc2)).findFirst();
+
+    assertTrue(dto1.isPresent());
+    assertTrue(dto2.isPresent());
+    assertEquals(2, dto1.get().kommenttiMaara());
+    assertEquals(1, dto2.get().kommenttiMaara());
+    assertNotNull(dto1.get().uusinKommenttiAika());
+    assertNotNull(dto2.get().uusinKommenttiAika());
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitOrdersByLatestComment() {
+    var artikkeliErc1 = "article-1";
+    var artikkeliErc2 = "article-2";
+
+    service.add(user, artikkeliErc1, "First comment");
+    service.add(user, artikkeliErc2, "Second comment");
+
+    var result = service.findKommentoidutArtikkelit(user, Pageable.ofSize(10));
+
+    assertNotNull(result);
+    assertEquals(2, result.maara());
+    // Most recent comment should be first
+    assertEquals(artikkeliErc2, result.sisalto().get(0).artikkeliErc());
+    assertEquals(artikkeliErc1, result.sisalto().get(1).artikkeliErc());
+  }
+
+  @Test
+  @WithMockUser
+  void findKommentoidutArtikkelitReturnsEmptyForUserWithNoComments() {
+    var result = service.findKommentoidutArtikkelit(user, Pageable.ofSize(10));
+
+    assertNotNull(result);
+    assertEquals(0, result.maara());
+    assertTrue(result.sisalto().isEmpty());
   }
 }

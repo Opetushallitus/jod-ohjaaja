@@ -10,8 +10,10 @@
 package fi.okm.jod.ohjaaja.service;
 
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.KommentoidutArtikkelitDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.repository.projection.KommentitPerArtikkelit;
 import java.util.Optional;
 
 public final class ArtikkelinKommenttiMapper {
@@ -27,5 +29,16 @@ public final class ArtikkelinKommenttiMapper {
             Optional.ofNullable(entity.getOhjaaja()).map(Ohjaaja::getId).orElse(null),
             entity.getKommentti(),
             entity.getLuotu());
+  }
+
+  public static KommentoidutArtikkelitDto mapKommentoidutArtikkelit(
+      KommentitPerArtikkelit kommentitPerArtikkeli) {
+    return kommentitPerArtikkeli == null
+        ? null
+        : new KommentoidutArtikkelitDto(
+            kommentitPerArtikkeli.getArtikkeliErc(),
+            kommentitPerArtikkeli.getUusinKommenttiAika(),
+            kommentitPerArtikkeli.getVanhinKommenttiAika(),
+            kommentitPerArtikkeli.getKommenttiMaara());
   }
 }
