@@ -15,6 +15,7 @@ import fi.okm.jod.ohjaaja.annotation.FeatureRequired;
 import fi.okm.jod.ohjaaja.config.logging.LogMarker;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.KommentoidutArtikkelitDto;
 import fi.okm.jod.ohjaaja.dto.PalauteViestiDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
@@ -112,6 +113,17 @@ public class ArtikkelinKommenttiService {
         kommentit.map(ArtikkelinKommenttiMapper::mapArtikkelinKommentti).getContent(),
         kommentit.getTotalElements(),
         kommentit.getTotalPages());
+  }
+
+  @FeatureRequired(FeatureFlag.Feature.COMMENTS)
+  public SivuDto<KommentoidutArtikkelitDto> findKommentoidutArtikkelit(
+      @NotNull JodUser jodUser, Pageable pageable) {
+    var ohjaaja = ohjaajat.getReferenceById(jodUser.getId());
+    var queryResults = artikkelinKommentit.findKommentoidutArtikkelitByOhjaaja(ohjaaja, pageable);
+    var mappedResults =
+        queryResults.map(ArtikkelinKommenttiMapper::mapKommentoidutArtikkelit).toList();
+    return new SivuDto<>(
+        mappedResults, queryResults.getTotalElements(), queryResults.getTotalPages());
   }
 
   @FeatureRequired(FeatureFlag.Feature.COMMENTS)

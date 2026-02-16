@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.controller;
 
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.KommentoidutArtikkelitDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.dto.validationgroup.Add;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKommenttiService;
@@ -39,6 +40,16 @@ public class ArtikkelinKommenttiController {
 
     return service.findByArtikkeliErc(
         artikkeliErc, PageRequest.of(sivu, koko, Sort.by(Sort.Direction.DESC, "luotu")));
+  }
+
+  @GetMapping("/omat")
+  @Operation(
+      summary = "Finds all articles commented by the authenticated user with details",
+      description = "Returns article ERCs with comment count and timestamp of latest comment")
+  SivuDto<KommentoidutArtikkelitDto> findOmatKommentoidutArtikkelit(
+      @AuthenticationPrincipal JodUser user, @RequestParam int sivu, @RequestParam int koko) {
+    return service.findKommentoidutArtikkelit(
+        user, PageRequest.of(sivu, koko, Sort.by(Sort.Direction.DESC, "uusinKommenttiAika")));
   }
 
   @PostMapping

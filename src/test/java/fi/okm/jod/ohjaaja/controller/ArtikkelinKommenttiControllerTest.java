@@ -22,6 +22,7 @@ import fi.okm.jod.ohjaaja.config.ApiSecurityConfig;
 import fi.okm.jod.ohjaaja.config.mocklogin.MockJodUserImpl;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.ArtikkelinKommenttiDto;
+import fi.okm.jod.ohjaaja.dto.KommentoidutArtikkelitDto;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
 import fi.okm.jod.ohjaaja.errorhandler.ErrorInfoFactory;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKommenttiService;
@@ -145,6 +146,62 @@ class ArtikkelinKommenttiControllerTest {
 
     mockMvc
         .perform(delete("/api/artikkeli/kommentit/{id}", kommenttiId).with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(forwardedUrl("/error"));
+  }
+
+  @Test
+  @WithAnonymousUser
+  void unauthenticatedUserCannotAccessOmatEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/artikkeli/kommentit/omat")
+                .param("sivu", "0")
+                .param("koko", "10")
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(forwardedUrl("/error"));
+  }
+
+  @Test
+  @WithUserDetails("test")
+  void findOmatKommentoidutArtikkelit() throws Exception {
+    var instant = Instant.now();
+    var dto1 = new KommentoidutArtikkelitDto("article-1", instant, instant.minusSeconds(60), 2);
+    var dto2 =
+        new KommentoidutArtikkelitDto(
+            "article-2", instant.minusSeconds(10), instant.minusSeconds(10), 1);
+    var sivuDto = new SivuDto<>(List.of(dto1, dto2), 2, 1);
+
+    when(service.findKommentoidutArtikkelit(any(JodUser.class), any(PageRequest.class)))
+        .thenReturn(sivuDto);
+
+    mockMvc
+        .perform(
+            get("/api/artikkeli/kommentit/omat")
+                .param("sivu", "0")
+                .param("koko", "10")
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.sisalto[0].artikkeliErc").value("article-1"))
+        .andExpect(jsonPath("$.sisalto[0].kommenttiMaara").value(2))
+        .andExpect(jsonPath("$.sisalto[0].uusinKommenttiAika").isNotEmpty())
+        .andExpect(jsonPath("$.sisalto[0].vanhinKommenttiAika").isNotEmpty())
+        .andExpect(jsonPath("$.sisalto[1].artikkeliErc").value("article-2"))
+        .andExpect(jsonPath("$.sisalto[1].kommenttiMaara").value(1))
+        .andExpect(jsonPath("$.maara").value(2))
+        .andExpect(jsonPath("$.sivuja").value(1));
+  }
+
+  @Test
+  @WithAnonymousUser
+  void unauthenticatedUserCannotAccessOmatYksityiskohdetEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/artikkeli/kommentit/omat-yksityiskohdat")
+                .param("sivu", "0")
+                .param("koko", "10")
+                .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(forwardedUrl("/error"));
   }
