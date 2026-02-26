@@ -11,7 +11,10 @@ package fi.okm.jod.ohjaaja.dto;
 
 import fi.okm.jod.ohjaaja.dto.validationgroup.Add;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 

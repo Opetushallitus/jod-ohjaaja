@@ -32,8 +32,12 @@ public class ArtikkelinKatseluId implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ArtikkelinKatseluId that)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ArtikkelinKatseluId that)) {
+      return false;
+    }
     return Objects.equals(artikkeliErc, that.artikkeliErc) && Objects.equals(paiva, that.paiva);
   }
 

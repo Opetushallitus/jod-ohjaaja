@@ -31,9 +31,10 @@ spring:
     baseline-description: baseline
   session:
     timeout: 30m
-    redis:
-      repository-type: default
-      namespace: spring:session:ohjaaja
+    data:
+      redis:
+        repository-type: default
+        namespace: spring:session:ohjaaja
   cache:
     type: caffeine
     caffeine:
@@ -44,15 +45,16 @@ spring:
         enabled: false
       secretsmanager:
         enabled: false
+  web:
+    error:
+      whitelabel:
+        enabled: false
+      include-stacktrace: never
+      include-exception: false
 
 server:
   compression:
     enabled: true
-  error:
-    whitelabel:
-      enabled: false
-    include-stacktrace: never
-    include-exception: false
   servlet:
     context-path: /ohjaaja
 

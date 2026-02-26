@@ -9,7 +9,6 @@
 
 package fi.okm.jod.ohjaaja.errorhandler;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import fi.okm.jod.ohjaaja.errorhandler.ErrorInfo.ErrorCode;
 import fi.okm.jod.ohjaaja.service.NotFoundException;
 import fi.okm.jod.ohjaaja.service.ServiceException;
@@ -33,6 +32,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import tools.jackson.databind.DatabindException;
 
 @SuppressWarnings("NullableProblems")
 @ControllerAdvice
@@ -51,7 +51,7 @@ class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
       WebRequest request) {
 
     List<String> details = null;
-    if (ex.getCause() instanceof JsonMappingException) {
+    if (ex.getCause() instanceof DatabindException) {
       details = List.of("JsonMappingFailure");
     }
     var info = errorInfo.of(ErrorCode.MESSAGE_NOT_READABLE, details);

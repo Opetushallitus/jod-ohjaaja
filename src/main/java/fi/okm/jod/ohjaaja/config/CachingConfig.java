@@ -7,15 +7,11 @@
  * Licensed under the EUPL-1.2-or-later.
  */
 
-package fi.okm.jod.ohjaaja.controller;
+package fi.okm.jod.ohjaaja.config;
 
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-public final class ETags {
-  private ETags() {
-    // utility class
-  }
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Configuration;
 
-  public static String weakETagOf(long version) {
-    return "W/\"" + version + "\"";
-  }
-}
+@Configuration
+@EnableCaching
+class CachingConfig {}

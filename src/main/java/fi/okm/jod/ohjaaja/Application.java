@@ -12,12 +12,10 @@ package fi.okm.jod.ohjaaja;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cache.annotation.EnableCaching;
 
 /** Application entrypoint. */
 @SpringBootApplication
 @ConfigurationPropertiesScan("fi.okm.jod.ohjaaja")
-@EnableCaching
 public class Application {
 
   public static void main(String[] args) {

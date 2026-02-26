@@ -12,7 +12,6 @@ package fi.okm.jod.ohjaaja.config.mocklogin;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import java.util.Collection;
 import java.util.Set;
@@ -22,6 +21,7 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @SuppressWarnings("serial")
 @EqualsAndHashCode(of = "username")

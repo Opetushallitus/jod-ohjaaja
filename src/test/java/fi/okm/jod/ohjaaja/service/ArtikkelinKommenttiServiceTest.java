@@ -9,7 +9,11 @@
 
 package fi.okm.jod.ohjaaja.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentinIlmianto;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
@@ -73,7 +77,7 @@ class ArtikkelinKommenttiServiceTest extends AbstractServiceTest {
 
   @Test
   @WithMockUser
-  void addCommentWithHTMLContentWorks() {
+  void addCommentWithHtmlContentWorks() {
     var artikkeliErc = "external-reference-code";
     var commentContent = "<b>Bold comment</b>";
     var result = service.add(user, artikkeliErc, commentContent);
