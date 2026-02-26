@@ -2,7 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:11.20.2")
+    classpath("org.flywaydb:flyway-database-postgresql:${flywayVersion}")
   }
 }
 
@@ -10,18 +10,18 @@ plugins {
   id 'java'
   id 'jacoco'
 
-  id 'org.springframework.boot' version '3.5.10'
-  id 'io.spring.dependency-management' version '1.1.7'
+  id 'org.springframework.boot'
+  id 'io.spring.dependency-management'
 
   id 'checkstyle'
-  id "com.diffplug.spotless" version "8.2.0"
-  id "com.github.spotbugs" version "6.4.8"
+  id "com.diffplug.spotless"
+  id "com.github.spotbugs"
   id "org.sonarqube" version "6.3.1.5724"
   id 'org.springdoc.openapi-gradle-plugin' version '1.9.0'
 
   id "com.github.ben-manes.versions" version "0.53.0"
   id 'org.cyclonedx.bom' version '3.1.0'
-  id "org.flywaydb.flyway" version "11.20.2"
+  id "org.flywaydb.flyway" version "${flywayVersion}"
 }
 
 group = 'fi.okm.jod'
@@ -29,12 +29,12 @@ version = '0.0.1-SNAPSHOT'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
   }
 }
 
 compileJava {
-  options.compilerArgs << '-Xlint:all,-processing,-serial'
+  options.compilerArgs << '-Xlint:all,-processing,-serial,-classfile,-rawtypes'
 }
 
 repositories {
@@ -44,10 +44,6 @@ repositories {
 
 ext {
   spotbugsVersion = "4.9.8"
-  bouncycastleVersion = "1.83"
-  springdocVersion = "2.8.14"
-  setProperty("flyway.version", "11.20.2")
-  setProperty("commons-lang3.version", "3.18.0")
 }
 
 configurations {
@@ -61,54 +57,48 @@ configurations {
     resolutionStrategy.activateDependencyLocking()
   }
   schemaSpy
+  mockitoAgent
 }
 
 dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-aspectj'
   implementation 'org.springframework.boot:spring-boot-starter-actuator'
   implementation 'org.springframework.boot:spring-boot-starter-security'
-  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-webmvc'
   implementation 'org.springframework.boot:spring-boot-starter-data-redis'
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
   implementation 'org.springframework.boot:spring-boot-starter-validation'
   implementation 'org.springframework.boot:spring-boot-starter-cache'
-  implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+  implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
+  implementation 'org.springframework.boot:spring-boot-starter-security-saml2'
+  implementation 'org.springframework.boot:spring-boot-starter-session-data-redis'
+  implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
 
-  implementation 'org.springframework.session:spring-session-data-redis'
+  implementation 'org.springframework.boot:spring-boot-starter-flyway'
+  implementation "org.flywaydb:flyway-database-postgresql"
 
-  implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.4.2')
+  implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
-  implementation 'org.springframework.security:spring-security-saml2-service-provider'
-
-  implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-  implementation 'io.micrometer:micrometer-registry-cloudwatch2'
-  implementation 'io.zipkin.aws:brave-propagation-aws'
-
-  implementation platform('software.amazon.awssdk:bom:2.41.13')
+  implementation platform('software.amazon.awssdk:bom:2.41.34')
   implementation 'software.amazon.awssdk:http-auth-aws'
   implementation 'software.amazon.awssdk:rds'
   implementation 'software.amazon.awssdk:sagemakerruntime'
-  implementation 'software.amazon.awssdk:cloudwatch'
 
   implementation 'com.google.guava:guava:33.5.0-jre'
-
-  implementation "org.flywaydb:flyway-core"
-  implementation "org.flywaydb:flyway-database-postgresql"
 
   // Caffeine cache implementation
   implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
 
   implementation 'org.jsoup:jsoup:1.22.1'
 
-  //override OpenSAML dependencies
-  implementation "org.bouncycastle:bcpkix-jdk18on:${bouncycastleVersion}"
-  implementation "org.bouncycastle:bcutil-jdk18on:${bouncycastleVersion}"
-  implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
-  // OpenAPI API description and Swagger UI
-  implementation "org.springdoc:springdoc-openapi-starter-webmvc-api:${springdocVersion}"
-  developmentOnly "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+  implementation "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
+  implementation "org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}"
+
+  implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:3.0.1'
+  developmentOnly 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
 
   compileOnly 'org.projectlombok:lombok'
   developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -117,16 +107,17 @@ dependencies {
   runtimeOnly 'org.postgresql:postgresql'
 
   annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-  annotationProcessor 'org.hibernate.orm:hibernate-jpamodelgen'
+  annotationProcessor 'org.hibernate.orm:hibernate-processor'
   annotationProcessor 'org.projectlombok:lombok'
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+  testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+  testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-  testImplementation 'org.springframework.security:spring-security-test'
 
-  testImplementation "org.testcontainers:postgresql"
-
-  testImplementation 'org.testcontainers:junit-jupiter'
+  testImplementation "org.testcontainers:testcontainers-postgresql"
+  testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
   testImplementation 'org.junit.jupiter:junit-jupiter'
 
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -140,20 +131,26 @@ dependencies {
 
   schemaSpy 'org.schemaspy:schemaspy:7.0.2'
   schemaSpy 'org.postgresql:postgresql'
+
+  mockitoAgent('org.mockito:mockito-core') {
+    transitive = false
+  }
 }
 
 tasks.named('test', Test) {
   useJUnitPlatform()
-  jvmArgs += '-XX:+EnableDynamicAgentLoading'
+  maxHeapSize = "1g"
+  jvmArgs += ['-XX:+EnableDynamicAgentLoading',
+              "-javaagent:${configurations.mockitoAgent.asPath}"]
   systemProperty('file.encoding', 'UTF-8')
   testLogging {
-    events("passed", "skipped", "failed")
+    events("skipped", "failed")
   }
 }
 
 checkstyle {
   toolVersion = '13.0.0'
-  showViolations = false
+  showViolations = true
 
   def archive = configurations.checkstyle.filter {
     it.name.startsWith("checkstyle")
@@ -162,6 +159,12 @@ checkstyle {
   configDirectory = file("${rootProject.rootDir}/gradle/config/checkstyle")
   configProperties = [
       'org.checkstyle.google.suppressionfilter.config': "${rootProject.rootDir}/gradle/config/checkstyle/suppressions.xml",
+  ]
+}
+
+checkstyleMain {
+  configProperties += [
+      'org.checkstyle.google.severity': 'error',
   ]
 }
 
@@ -197,6 +200,10 @@ jacocoTestReport {
 spotbugs {
   toolVersion = spotbugsVersion
   excludeFilter = file('gradle/config/spotbugs/exclusions.xml')
+  jvmArgs = [
+      '--sun-misc-unsafe-memory-access=allow',
+      '--enable-native-access=ALL-UNNAMED',
+  ]
 }
 
 spotbugsMain {
@@ -246,6 +253,11 @@ sonar {
     property "sonar.host.url", "https://sonarcloud.io"
     property "sonar.java.spotbugs.reportPaths", "build/reports/spotbugs/main.xml"
     property "sonar.cpd.exclusions", "src/**/entity/*.java"
+
+    //global issue exclusions (due to not compatible with e.g. spotless)
+    property "sonar.issue.ignore.multicriteria", "e1"
+    property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S8445"
+    property "sonar.issue.ignore.multicriteria.e1.resourceKey", "src/**/*.java"
   }
 }
 
@@ -255,6 +267,11 @@ openApi {
   apiDocsUrl = "http://localhost:${port}/ohjaaja/openapi/openapi.json"
   waitTimeInSeconds = 30
   customBootRun {
+    // for netty, see https://github.com/netty/netty/wiki/Java-24-and-sun.misc.Unsafe
+    jvmArgs = [
+        '--sun-misc-unsafe-memory-access=allow',
+        '--enable-native-access=ALL-UNNAMED',
+    ]
     environment = [COMPOSE_PROJECT_NAME: "jod-ohjaaja-openapi"]
     args = ["--spring.main.lazy-initialization=true",
             "--server.port=${port}",
@@ -278,9 +295,9 @@ static int majorVersion(String version) {
 static boolean isPreReleaseVersion(String version) {
   return version.containsIgnoreCase("alpha")
       || version.containsIgnoreCase("beta")
-      || version.matches(".*[.-]M\\d+")
-      || version.matches(".*[.-]RC\\d+")
-      || version.matches(".*[.-]CR\\d+")
+      || version.matches(".*[.-](?i:M)\\d+")
+      || version.matches(".*[.-](?i:RC)\\d+")
+      || version.matches(".*[.-](?i:CR)\\d+")
 }
 
 tasks.named("dependencyUpdates", DependencyUpdatesTask).configure {
@@ -360,6 +377,23 @@ tasks.register('validateFlywayMigrationNames') {
       }
     }
   }
+}
+
+// suppress warnings due to Netty
+// see https://github.com/netty/netty/wiki/Java-24-and-sun.misc.Unsafe
+
+tasks.withType(Test).configureEach {
+  jvmArgs = [
+      '--sun-misc-unsafe-memory-access=allow',
+      '--enable-native-access=ALL-UNNAMED',
+  ]
+}
+
+tasks.withType(JavaExec).configureEach {
+  jvmArgs = [
+      '--sun-misc-unsafe-memory-access=allow',
+      '--enable-native-access=ALL-UNNAMED',
+  ]
 }
 
 check.dependsOn validateFlywayMigrationNames

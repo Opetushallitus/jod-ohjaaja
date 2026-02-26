@@ -33,8 +33,12 @@ public class ArtikkelinKommentinIlmiantoId implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ArtikkelinKommentinIlmiantoId that)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ArtikkelinKommentinIlmiantoId that)) {
+      return false;
+    }
     return Objects.equals(artikkelinKommenttiId, that.artikkelinKommenttiId)
         && Objects.equals(tunnistautunut, that.tunnistautunut);
   }

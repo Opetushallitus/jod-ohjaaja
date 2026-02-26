@@ -9,7 +9,10 @@
 
 package fi.okm.jod.ohjaaja.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKatseluRepository;
 import fi.okm.jod.ohjaaja.repository.ViimeksiKatseltuArtikkeliRepository;

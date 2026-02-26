@@ -10,15 +10,17 @@
 package fi.okm.jod.ohjaaja.errorhandler;
 
 import fi.okm.jod.ohjaaja.errorhandler.ErrorInfo.ErrorCode;
+import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.servlet.error.ErrorController;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -28,11 +30,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Fallback error controller for errors that are not handled elsewhere. */
 @RestController
-@RequiredArgsConstructor
 @Hidden
 @Slf4j
 public class FallbackErrorController implements ErrorController {
-  private final Tracer tracer;
+
+  private final @Nullable Tracer tracer;
+
+  public FallbackErrorController(ObjectProvider<Tracer> tracer) {
+    this.tracer = tracer.getIfAvailable();
+  }
 
   /** Renders (almost all) unhandled errors as JSON. */
   @SuppressWarnings({"java:S6857", "java:S3752"})
@@ -70,7 +76,7 @@ public class FallbackErrorController implements ErrorController {
           .location(URI.create("/?error=AUTHENTICATION_FAILURE"))
           .body(
               new ErrorInfo(
-                  ErrorCode.AUTHENTICATION_FAILURE, tracer.currentSpan(), List.of(status.name())));
+                  ErrorCode.AUTHENTICATION_FAILURE, traceId(tracer), List.of(status.name())));
     }
 
     if (status.is5xxServerError()) {
@@ -88,7 +94,13 @@ public class FallbackErrorController implements ErrorController {
     return ResponseEntity.status(status)
         .header("Cache-Control", "private, no-cache, no-store, stale-if-error=0")
         .header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
-        .body(new ErrorInfo(errorCode, tracer.currentSpan(), List.of(status.name())));
+        .body(new ErrorInfo(errorCode, traceId(tracer), List.of(status.name())));
+  }
+
+  private static @Nullable String traceId(@Nullable Tracer tracer) {
+    return (tracer != null && tracer.currentSpan() instanceof Span span)
+        ? span.context().traceId()
+        : null;
   }
 
   private HttpStatus getStatus(HttpServletRequest request) {

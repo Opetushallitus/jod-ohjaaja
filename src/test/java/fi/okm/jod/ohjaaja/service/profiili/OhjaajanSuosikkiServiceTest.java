@@ -9,7 +9,11 @@
 
 package fi.okm.jod.ohjaaja.service.profiili;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.okm.jod.ohjaaja.dto.profiili.SuosikkiDto;
 import fi.okm.jod.ohjaaja.service.AbstractServiceTest;

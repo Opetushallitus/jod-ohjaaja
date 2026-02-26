@@ -1,4 +1,4 @@
-@NonNullApi
+@NullMarked
 package fi.okm.jod.ohjaaja.repository;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;

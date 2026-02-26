@@ -9,7 +9,10 @@
 
 package fi.okm.jod.ohjaaja.service;
 
-import com.github.benmanes.caffeine.cache.*;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Ticker;
 import fi.okm.jod.ohjaaja.dto.FeatureFlagDto;
 import fi.okm.jod.ohjaaja.entity.FeatureFlag;
 import fi.okm.jod.ohjaaja.repository.FeatureFlagRepository;
