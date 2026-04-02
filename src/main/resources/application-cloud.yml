@@ -55,6 +55,7 @@ management:
   metrics:
     enable:
       all: false
+      fi.okm.jod.ohjaaja: true
       hikaricp: true
       tomcat: true
   endpoint:
