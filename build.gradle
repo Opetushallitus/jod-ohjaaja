@@ -43,7 +43,7 @@ repositories {
 }
 
 ext {
-  spotbugsVersion = "4.9.8"
+  spotbugsVersion = "4.10.2"
 }
 
 configurations {
@@ -77,12 +77,12 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-flyway'
   implementation "org.flywaydb:flyway-database-postgresql"
 
-  implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.1')
+  implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.2')
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager'
   implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
-  implementation platform('software.amazon.awssdk:bom:2.42.41')
+  implementation platform('software.amazon.awssdk:bom:2.46.11')
   implementation 'software.amazon.awssdk:http-auth-aws'
   implementation 'software.amazon.awssdk:rds'
   implementation 'software.amazon.awssdk:sagemakerruntime'
@@ -90,7 +90,7 @@ dependencies {
   implementation 'com.google.guava:guava:33.6.0-jre'
 
   // Caffeine cache implementation
-  implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
+  implementation 'com.github.ben-manes.caffeine:caffeine:3.2.4'
 
   implementation 'org.jsoup:jsoup:1.22.2'
 

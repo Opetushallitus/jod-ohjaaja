@@ -82,6 +82,9 @@ class ResponseTokenConverter implements Converter<ResponseToken, Saml2Authentica
       }
 
       var accessor = authentication.getCredentials();
+      if (accessor == null) {
+        throw new BadCredentialsException("Missing credentials in SAML assertion");
+      }
 
       var userId =
           resolveUser(
