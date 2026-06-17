@@ -9,6 +9,8 @@
 
 package fi.okm.jod.ohjaaja.service;
 
+import static java.util.Objects.requireNonNull;
+
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommentinIlmiantoRepository;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKommenttiRepository;
 import fi.okm.jod.ohjaaja.repository.projection.IlmiantoYhteenveto;
@@ -33,13 +35,15 @@ public class ArtikkelinKommenttiModerointiService {
   }
 
   public void deleteArtikkelinKommentti(UUID artikkelinKommenttiId) {
-    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    String userId =
+        requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
     artikkelinKommenttiRepository.deleteById(artikkelinKommenttiId);
     log.info("User {} deleted comment {}", userId, artikkelinKommenttiId);
   }
 
   public void deleteIlmiannot(UUID artikkelinKommenttiId) {
-    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    String userId =
+        requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
     artikkelinKommentinIlmiantoRepository.deleteAllByArtikkelinKommenttiId(artikkelinKommenttiId);
     log.info("User {} deleted reports for comment {}", userId, artikkelinKommenttiId);
   }

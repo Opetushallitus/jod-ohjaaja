@@ -9,12 +9,15 @@
 
 package fi.okm.jod.ohjaaja.service;
 
+import static java.util.Objects.requireNonNull;
+
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.Ticker;
 import fi.okm.jod.ohjaaja.dto.FeatureFlagDto;
 import fi.okm.jod.ohjaaja.entity.FeatureFlag;
+import fi.okm.jod.ohjaaja.entity.FeatureFlag.Feature;
 import fi.okm.jod.ohjaaja.repository.FeatureFlagRepository;
 import java.time.Duration;
 import java.util.List;
@@ -22,6 +25,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeatureFlagService {
 
   private final FeatureFlagRepository featureFlags;
-  private final LoadingCache<FeatureFlag.Feature, Boolean> featureCache;
+  private final LoadingCache<Feature, Boolean> featureCache;
   static final Duration CACHE_DURATION = Duration.ofMinutes(1);
 
   @Autowired
@@ -50,21 +55,21 @@ public class FeatureFlagService {
     this.featureCache =
         Caffeine.newBuilder()
             .refreshAfterWrite(CACHE_DURATION)
-            .initialCapacity(FeatureFlag.Feature.values().length)
+            .initialCapacity(Feature.values().length)
             .ticker(ticker)
             .executor(executor)
             .build(new Loader(featureFlags));
   }
 
-  public boolean isFeatureEnabled(FeatureFlag.Feature feature) {
+  public boolean isFeatureEnabled(Feature feature) {
     return Boolean.TRUE.equals(featureCache.get(feature));
   }
 
   @PreAuthorize(
       "hasAuthority('SCOPE_' + @environment.getProperty('jod.ohjaaja.internal-api.oauth2-scope'))")
-  public void setFeatureFlag(FeatureFlag.Feature feature, boolean enabled) {
+  public void setFeatureFlag(Feature feature, boolean enabled) {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
-    var updatedBy = authentication.getName();
+    var updatedBy = requireNonNull(authentication).getName();
     var flag = featureFlags.findById(feature).orElse(new FeatureFlag(feature));
     flag.setEnabled(enabled);
     flag.setUpdatedBy(updatedBy);
@@ -80,16 +85,16 @@ public class FeatureFlagService {
   }
 
   @RequiredArgsConstructor
-  private static class Loader implements CacheLoader<FeatureFlag.Feature, Boolean> {
+  private static class Loader implements CacheLoader<Feature, Boolean> {
     private final FeatureFlagRepository featureFlagRepository;
 
     @Override
-    public Boolean load(FeatureFlag.Feature key) {
+    public Boolean load(@NonNull Feature key) {
       return reload(key, null);
     }
 
     @Override
-    public Boolean reload(FeatureFlag.Feature key, Boolean oldValue) {
+    public Boolean reload(@NonNull Feature key, @Nullable Boolean oldValue) {
       return featureFlagRepository.findById(key).map(FeatureFlag::isEnabled).orElse(false);
     }
   }

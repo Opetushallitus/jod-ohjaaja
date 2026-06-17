@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +84,10 @@ public class Saml2LoginConfig {
                 .build()
                 .getAssertingPartyMetadata();
 
-    var descriptor = metadata.getEntityDescriptor().getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
+    var descriptor =
+        requireNonNull(
+            metadata.getEntityDescriptor().getIDPSSODescriptor(SAMLConstants.SAML20P_NS),
+            "IDPSSODescriptor not found in metadata for entity");
 
     var slo = getRedirectionEndpoint(descriptor.getSingleLogoutServices());
     var sso = getRedirectionEndpoint(descriptor.getSingleSignOnServices());
@@ -101,8 +105,8 @@ public class Saml2LoginConfig {
                 requireNonNullElse(slo.getResponseLocation(), slo.getLocation()))
             .build();
 
-    var cert = PemContent.of(properties.getCertificate());
-    var key = PemContent.of(properties.getPrivateKey());
+    var cert = requireNonNull(PemContent.of(properties.getCertificate()));
+    var key = requireNonNull(PemContent.of(properties.getPrivateKey()));
 
     var samlCredential =
         new Saml2X509Credential(
@@ -125,7 +129,7 @@ public class Saml2LoginConfig {
 
   private static <T extends Endpoint> T getRedirectionEndpoint(Collection<T> endpoints) {
     return endpoints.stream()
-        .filter(s -> s.getBinding().equals(SAMLConstants.SAML2_REDIRECT_BINDING_URI))
+        .filter(s -> Objects.equals(s.getBinding(), SAMLConstants.SAML2_REDIRECT_BINDING_URI))
         .findAny()
         .orElseThrow();
   }
