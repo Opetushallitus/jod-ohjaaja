@@ -12,11 +12,13 @@ package fi.okm.jod.ohjaaja.config.suomifi;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import fi.okm.jod.ohjaaja.service.profiili.OhjaajaService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -25,11 +27,7 @@ import org.springframework.security.saml2.provider.service.registration.Saml2Mes
 class Saml2LoginConfigTest {
   @Test
   void shouldCreateRelyingPartyRepository() throws IOException {
-    var props = new RelyingPartyProperties();
-    props.setRegistrationId("test");
-    props.setIdpMetadataUri("classpath:data/idp-metadata.xml");
-    props.setCertificate(getContent("data/test.crt.pem"));
-    props.setPrivateKey(getContent("data/test.key.pem"));
+    var props = baseProps();
 
     var config = new Saml2LoginConfig(mock(OhjaajaService.class));
     var repo = assertDoesNotThrow(() -> config.relyingPartyRegistrationRepository(props));
@@ -42,6 +40,49 @@ class Saml2LoginConfigTest {
     assertEquals(
         Saml2MessageBinding.REDIRECT,
         registration.getAssertingPartyMetadata().getSingleSignOnServiceBinding());
+  }
+
+  @Test
+  void shouldRejectWrongCertificate() throws IOException {
+    var props = baseProps();
+    // SP cert was not used to sign the IDP metadata
+    props.setIdpMetadataSigningCaCertificate(getContent("data/test.crt.pem"));
+
+    var config = new Saml2LoginConfig(mock(OhjaajaService.class));
+    assertThrows(
+        IllegalStateException.class, () -> config.relyingPartyRegistrationRepository(props));
+  }
+
+  @Test
+  void shouldRejectMetadataWithTamperedSignedContent() throws IOException {
+    var tamperedMetadata = Files.createTempFile("tampered-idp-metadata", ".xml");
+    try {
+      var metadata =
+          getContent("data/idp-metadata.xml")
+              .replace("https://example.org/idp1", "https://attacker.example/idp1");
+      Files.writeString(tamperedMetadata, metadata, StandardCharsets.UTF_8);
+
+      var props = baseProps();
+      props.setIdpMetadataUri(tamperedMetadata.toUri().toString());
+
+      var config = new Saml2LoginConfig(mock(OhjaajaService.class));
+      var exception =
+          assertThrows(
+              IllegalStateException.class, () -> config.relyingPartyRegistrationRepository(props));
+      assertEquals("IDP metadata signature validation failed", exception.getMessage());
+    } finally {
+      Files.deleteIfExists(tamperedMetadata);
+    }
+  }
+
+  private RelyingPartyProperties baseProps() throws IOException {
+    var props = new RelyingPartyProperties();
+    props.setRegistrationId("test");
+    props.setIdpMetadataUri("classpath:data/idp-metadata.xml");
+    props.setCertificate(getContent("data/test.crt.pem"));
+    props.setPrivateKey(getContent("data/test.key.pem"));
+    props.setIdpMetadataSigningCaCertificate(getContent("data/idp.crt.pem"));
+    return props;
   }
 
   private static @NotNull String getContent(String path) throws IOException {
