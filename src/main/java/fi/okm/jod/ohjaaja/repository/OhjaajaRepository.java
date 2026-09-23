@@ -10,6 +10,8 @@
 package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.repository.projection.TyoskentelyPaikkaMaara;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +23,12 @@ public interface OhjaajaRepository extends JpaRepository<Ohjaaja, UUID> {
 
   @Query(value = "SELECT tunnistus.remove_ohjaaja_id(:ohjaajaId)", nativeQuery = true)
   void removeId(UUID ohjaajaId);
+
+  @Query(
+      """
+      SELECT o.tyoskentelyPaikka AS tyoskentelyPaikka, COUNT(o) AS maara
+      FROM Ohjaaja o
+      GROUP BY o.tyoskentelyPaikka
+      """)
+  List<TyoskentelyPaikkaMaara> countByTyoskentelyPaikka();
 }
