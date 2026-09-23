@@ -15,6 +15,7 @@ import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,4 +47,14 @@ public interface ArtikkelinKatseluRepository
       """)
   Page<SummaPerArtikkeli> findSumKatselut(
       @Nullable Collection<String> artikkeliErcs, Pageable pageable);
+
+  @Query(
+      """
+      SELECT ak.artikkeliErc AS artikkeliErc, SUM(ak.maara) AS summa
+      FROM ArtikkelinKatselu ak
+      WHERE ak.paiva BETWEEN :alku AND :loppu
+      GROUP BY ak.artikkeliErc
+      ORDER BY SUM(ak.maara) DESC, ak.artikkeliErc
+      """)
+  List<SummaPerArtikkeli> findMostViewed(LocalDate alku, LocalDate loppu, Pageable pageable);
 }

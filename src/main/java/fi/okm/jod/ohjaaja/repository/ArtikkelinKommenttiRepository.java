@@ -12,6 +12,9 @@ package fi.okm.jod.ohjaaja.repository;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.repository.projection.KommentitPerArtikkelit;
+import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +36,15 @@ public interface ArtikkelinKommenttiRepository extends JpaRepository<ArtikkelinK
       """)
   Page<KommentitPerArtikkelit> findKommentoidutArtikkelitByOhjaaja(
       @Param("ohjaaja") Ohjaaja ohjaaja, Pageable pageable);
+
+  @Query(
+      """
+      SELECT k.artikkeliErc AS artikkeliErc, COUNT(k) AS summa
+      FROM ArtikkelinKommentti k
+      WHERE k.luotu >= :alku AND k.luotu < :loppu
+      GROUP BY k.artikkeliErc
+      ORDER BY COUNT(k) DESC, k.artikkeliErc
+      """)
+  List<SummaPerArtikkeli> findMostCommented(
+      @Param("alku") Instant alku, @Param("loppu") Instant loppu, Pageable pageable);
 }
