@@ -1,2 +1,0 @@
-org.springframework.boot.bootstrap.BootstrapRegistryInitializer=\
-fi.okm.jod.ohjaaja.config.aws.SecretsManagerVersionStageBootstrapInitializer
