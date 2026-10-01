@@ -43,7 +43,8 @@ class SessionConfigTest {
 
   @Container
   static GenericContainer<?> redisContainer =
-      new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
+      new GenericContainer<>(DockerImageName.parse("valkey/valkey:9-alpine"))
+          .withExposedPorts(6379);
 
   @Test
   void testSessionConfigBeans() {

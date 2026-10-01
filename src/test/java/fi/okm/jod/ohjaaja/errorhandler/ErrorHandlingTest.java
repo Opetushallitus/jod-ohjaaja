@@ -45,9 +45,11 @@ class ErrorHandlingTest {
   @LocalServerPort private int port;
   @Autowired ObjectMapper mapper;
 
-  @Container @ServiceConnection
+  @Container
+  @ServiceConnection(name = "redis")
   static GenericContainer<?> redisContainer =
-      new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
+      new GenericContainer<>(DockerImageName.parse("valkey/valkey:9-alpine"))
+          .withExposedPorts(6379);
 
   @Container @ServiceConnection
   static PostgreSQLContainer postgreSQLContainer =
