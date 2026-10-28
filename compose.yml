@@ -6,6 +6,8 @@ services:
     volumes:
       - ./scripts/valkey/valkey.conf:/usr/local/etc/valkey/valkey.conf
     command: valkey-server /usr/local/etc/valkey/valkey.conf
+    labels:
+      org.springframework.boot.service-connection: redis
 
   postgres:
     image: postgres:16-alpine
