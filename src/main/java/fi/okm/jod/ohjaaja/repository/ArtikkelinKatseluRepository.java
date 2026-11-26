@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKatselu;
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKatseluId;
+import fi.okm.jod.ohjaaja.entity.SisaltoTyyppi;
 import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -42,19 +43,26 @@ public interface ArtikkelinKatseluRepository
       """
       SELECT ak.artikkeliErc AS artikkeliErc, SUM(ak.maara) AS summa
       FROM ArtikkelinKatselu ak
+      LEFT JOIN Sisalto s ON s.erc = ak.artikkeliErc
       WHERE (:artikkeliErcs IS NULL OR ak.artikkeliErc IN :artikkeliErcs)
+        AND COALESCE(s.sisaltotyyppi, fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.ARTIKKELI) IN :tyypit
       GROUP BY ak.artikkeliErc
       """)
   Page<SummaPerArtikkeli> findSumKatselut(
-      @Nullable Collection<String> artikkeliErcs, Pageable pageable);
+      @Nullable Collection<String> artikkeliErcs,
+      Collection<SisaltoTyyppi> tyypit,
+      Pageable pageable);
 
   @Query(
       """
       SELECT ak.artikkeliErc AS artikkeliErc, SUM(ak.maara) AS summa
       FROM ArtikkelinKatselu ak
+      LEFT JOIN Sisalto s ON s.erc = ak.artikkeliErc
       WHERE ak.paiva BETWEEN :alku AND :loppu
+        AND COALESCE(s.sisaltotyyppi, fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.ARTIKKELI) = :tyyppi
       GROUP BY ak.artikkeliErc
       ORDER BY SUM(ak.maara) DESC, ak.artikkeliErc
       """)
-  List<SummaPerArtikkeli> findMostViewed(LocalDate alku, LocalDate loppu, Pageable pageable);
+  List<SummaPerArtikkeli> findMostViewed(
+      LocalDate alku, LocalDate loppu, SisaltoTyyppi tyyppi, Pageable pageable);
 }

@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.entity.OhjaajanSuosikki;
+import fi.okm.jod.ohjaaja.entity.SisaltoTyyppi;
 import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
 import java.time.Instant;
 import java.util.List;
@@ -29,11 +30,14 @@ public interface OhjaajanSuosikkiRepository extends JpaRepository<OhjaajanSuosik
 
   @Query(
       """
-      SELECT s.artikkeliErc AS artikkeliErc, COUNT(s) AS summa
-      FROM OhjaajanSuosikki s
-      WHERE s.luotu >= :alku AND s.luotu < :loppu
-      GROUP BY s.artikkeliErc
-      ORDER BY COUNT(s) DESC, s.artikkeliErc
+      SELECT os.artikkeliErc AS artikkeliErc, COUNT(os) AS summa
+      FROM OhjaajanSuosikki os
+      LEFT JOIN Sisalto s ON s.erc = os.artikkeliErc
+      WHERE os.luotu >= :alku AND os.luotu < :loppu
+        AND COALESCE(s.sisaltotyyppi, fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.ARTIKKELI) = :tyyppi
+      GROUP BY os.artikkeliErc
+      ORDER BY COUNT(os) DESC, os.artikkeliErc
       """)
-  List<SummaPerArtikkeli> findMostFavorited(Instant alku, Instant loppu, Pageable pageable);
+  List<SummaPerArtikkeli> findMostFavorited(
+      Instant alku, Instant loppu, SisaltoTyyppi tyyppi, Pageable pageable);
 }

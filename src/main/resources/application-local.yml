@@ -12,3 +12,6 @@ management:
       exposure:
         include: "health,metrics"
 
+jod:
+  cms:
+    base-url: http://localhost:8080/ohjaaja/cms

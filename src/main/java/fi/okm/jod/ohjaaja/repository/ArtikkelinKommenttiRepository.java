@@ -11,6 +11,7 @@ package fi.okm.jod.ohjaaja.repository;
 
 import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
+import fi.okm.jod.ohjaaja.entity.SisaltoTyyppi;
 import fi.okm.jod.ohjaaja.repository.projection.KommentitPerArtikkelit;
 import fi.okm.jod.ohjaaja.repository.projection.SummaPerArtikkeli;
 import java.time.Instant;
@@ -41,10 +42,15 @@ public interface ArtikkelinKommenttiRepository extends JpaRepository<ArtikkelinK
       """
       SELECT k.artikkeliErc AS artikkeliErc, COUNT(k) AS summa
       FROM ArtikkelinKommentti k
+      LEFT JOIN Sisalto s ON s.erc = k.artikkeliErc
       WHERE k.luotu >= :alku AND k.luotu < :loppu
+        AND COALESCE(s.sisaltotyyppi, fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.ARTIKKELI) = :tyyppi
       GROUP BY k.artikkeliErc
       ORDER BY COUNT(k) DESC, k.artikkeliErc
       """)
   List<SummaPerArtikkeli> findMostCommented(
-      @Param("alku") Instant alku, @Param("loppu") Instant loppu, Pageable pageable);
+      @Param("alku") Instant alku,
+      @Param("loppu") Instant loppu,
+      @Param("tyyppi") SisaltoTyyppi tyyppi,
+      Pageable pageable);
 }

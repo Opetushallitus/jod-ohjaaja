@@ -65,7 +65,10 @@ class InternalTilastoControllerTest {
                 List.of(new KiinnostusMaaraDto(42L, 2)),
                 List.of(new ArtikkeliMaaraDto("suosikki", 4)),
                 List.of(new ArtikkeliMaaraDto("kommentoitu", 5)),
-                List.of(new ArtikkeliMaaraDto("katsottu", 6))));
+                List.of(new ArtikkeliMaaraDto("katsottu", 6)),
+                List.of(new ArtikkeliMaaraDto("suosikki-uutinen", 7)),
+                List.of(new ArtikkeliMaaraDto("kommentoitu-uutinen", 8)),
+                List.of(new ArtikkeliMaaraDto("katsottu-uutinen", 9))));
 
     mockMvc
         .perform(
@@ -83,7 +86,10 @@ class InternalTilastoControllerTest {
         .andExpect(jsonPath("$.kiinnostukset[0].asiasanaId").value(42))
         .andExpect(jsonPath("$.suosituimmatArtikkelit[0].artikkeliErc").value("suosikki"))
         .andExpect(jsonPath("$.kommentoiduimmatArtikkelit[0].maara").value(5))
-        .andExpect(jsonPath("$.katsotuimmatArtikkelit[0].artikkeliErc").value("katsottu"));
+        .andExpect(jsonPath("$.katsotuimmatArtikkelit[0].artikkeliErc").value("katsottu"))
+        .andExpect(jsonPath("$.suosituimmatUutiset[0].artikkeliErc").value("suosikki-uutinen"))
+        .andExpect(jsonPath("$.kommentoiduimmatUutiset[0].maara").value(8))
+        .andExpect(jsonPath("$.katsotuimmatUutiset[0].artikkeliErc").value("katsottu-uutinen"));
   }
 
   @Test
