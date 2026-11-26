@@ -96,3 +96,6 @@ management:
 jod:
   session:
     maxDuration: 12h
+  cms:
+    site-id: 20117
+    timeout: 2s

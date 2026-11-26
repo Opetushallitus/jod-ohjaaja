@@ -12,6 +12,8 @@ spring:
       maximum-pool-size: 3
       schema: ohjaaja
 jod:
+  cms:
+    base-url: http://localhost:8080
   feedback:
     queue-arn: "test-feedback-queue"
 

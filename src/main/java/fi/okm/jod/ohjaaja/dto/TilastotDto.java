@@ -38,4 +38,18 @@ public record TilastotDto(
                     + " Comments removed by moderation are not included.")
         List<ArtikkeliMaaraDto> kommentoiduimmatArtikkelit,
     @NotNull @Schema(description = "Most viewed articles within the time range")
-        List<ArtikkeliMaaraDto> katsotuimmatArtikkelit) {}
+        List<ArtikkeliMaaraDto> katsotuimmatArtikkelit,
+    @NotNull
+        @Schema(
+            description =
+                "News most often marked as favorite within the time range."
+                    + " Favorites of deleted users are not included.")
+        List<ArtikkeliMaaraDto> suosituimmatUutiset,
+    @NotNull
+        @Schema(
+            description =
+                "Most commented news within the time range."
+                    + " Comments removed by moderation are not included.")
+        List<ArtikkeliMaaraDto> kommentoiduimmatUutiset,
+    @NotNull @Schema(description = "Most viewed news within the time range")
+        List<ArtikkeliMaaraDto> katsotuimmatUutiset) {}

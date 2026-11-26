@@ -45,5 +45,6 @@ public class FeatureFlag {
 
   public enum Feature {
     COMMENTS,
+    NEWS,
   }
 }

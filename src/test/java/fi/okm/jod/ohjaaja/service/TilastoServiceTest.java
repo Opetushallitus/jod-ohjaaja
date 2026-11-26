@@ -19,8 +19,10 @@ import fi.okm.jod.ohjaaja.entity.ArtikkelinKommentti;
 import fi.okm.jod.ohjaaja.entity.Ohjaaja;
 import fi.okm.jod.ohjaaja.entity.OhjaajanKiinnostus;
 import fi.okm.jod.ohjaaja.entity.OhjaajanSuosikki;
+import fi.okm.jod.ohjaaja.entity.SisaltoTyyppi;
 import fi.okm.jod.ohjaaja.entity.TyoskentelyPaikka;
 import fi.okm.jod.ohjaaja.repository.ArtikkelinKatseluRepository;
+import fi.okm.jod.ohjaaja.repository.SisaltoRepository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -37,6 +39,7 @@ class TilastoServiceTest extends AbstractServiceTest {
 
   @Autowired private TilastoService service;
   @Autowired private ArtikkelinKatseluRepository katseluRepository;
+  @Autowired private SisaltoRepository sisaltoRepository;
 
   @Test
   void shouldReturnEmptyStatisticsWithOnlyOneUser() {
@@ -49,6 +52,9 @@ class TilastoServiceTest extends AbstractServiceTest {
     assertEquals(0, tilastot.suosituimmatArtikkelit().size());
     assertEquals(0, tilastot.kommentoiduimmatArtikkelit().size());
     assertEquals(0, tilastot.katsotuimmatArtikkelit().size());
+    assertEquals(0, tilastot.suosituimmatUutiset().size());
+    assertEquals(0, tilastot.kommentoiduimmatUutiset().size());
+    assertEquals(0, tilastot.katsotuimmatUutiset().size());
   }
 
   @Test
@@ -158,6 +164,32 @@ class TilastoServiceTest extends AbstractServiceTest {
     assertEquals(
         List.of(new ArtikkeliMaaraDto("alussa", 1), new ArtikkeliMaaraDto("ennen", 1)),
         vainLoppu.suosituimmatArtikkelit());
+  }
+
+  @Test
+  void shouldSeparateNewsFromArticles() {
+    var ohjaaja = entityManager.find(Ohjaaja.class, user.getId());
+    var aika = Instant.now();
+    sisaltoRepository.insertIfAbsent("artikkeli", SisaltoTyyppi.ARTIKKELI.name());
+    sisaltoRepository.insertIfAbsent("uutinen", SisaltoTyyppi.UUTINEN.name());
+    for (var erc : List.of("artikkeli", "uutinen", "tuntematon")) {
+      createSuosikki(ohjaaja, erc, aika);
+      createKommentti(ohjaaja, erc, aika);
+      katseluRepository.upsertKatselu(erc, PAIVA);
+    }
+
+    var tilastot = service.getTilastot(null, null, 10);
+
+    // content without a known type is counted as an article
+    var artikkelit =
+        List.of(new ArtikkeliMaaraDto("artikkeli", 1), new ArtikkeliMaaraDto("tuntematon", 1));
+    var uutiset = List.of(new ArtikkeliMaaraDto("uutinen", 1));
+    assertEquals(artikkelit, tilastot.suosituimmatArtikkelit());
+    assertEquals(artikkelit, tilastot.kommentoiduimmatArtikkelit());
+    assertEquals(artikkelit, tilastot.katsotuimmatArtikkelit());
+    assertEquals(uutiset, tilastot.suosituimmatUutiset());
+    assertEquals(uutiset, tilastot.kommentoiduimmatUutiset());
+    assertEquals(uutiset, tilastot.katsotuimmatUutiset());
   }
 
   @Test

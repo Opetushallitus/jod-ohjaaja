@@ -9,6 +9,9 @@
 
 package fi.okm.jod.ohjaaja.service;
 
+import static fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.ARTIKKELI;
+import static fi.okm.jod.ohjaaja.entity.SisaltoTyyppi.UUTINEN;
+
 import fi.okm.jod.ohjaaja.dto.ArtikkeliMaaraDto;
 import fi.okm.jod.ohjaaja.dto.KiinnostusMaaraDto;
 import fi.okm.jod.ohjaaja.dto.TilastotDto;
@@ -70,9 +73,12 @@ public class TilastoService {
         kiinnostusRepository.countByAsiasanaId().stream()
             .map(k -> new KiinnostusMaaraDto(k.getAsiasanaId(), k.getMaara()))
             .toList(),
-        toDto(suosikkiRepository.findMostFavorited(alkuAika, loppuAika, sivu)),
-        toDto(kommenttiRepository.findMostCommented(alkuAika, loppuAika, sivu)),
-        toDto(katseluRepository.findMostViewed(alkuPaiva, loppuPaiva, sivu)));
+        toDto(suosikkiRepository.findMostFavorited(alkuAika, loppuAika, ARTIKKELI, sivu)),
+        toDto(kommenttiRepository.findMostCommented(alkuAika, loppuAika, ARTIKKELI, sivu)),
+        toDto(katseluRepository.findMostViewed(alkuPaiva, loppuPaiva, ARTIKKELI, sivu)),
+        toDto(suosikkiRepository.findMostFavorited(alkuAika, loppuAika, UUTINEN, sivu)),
+        toDto(kommenttiRepository.findMostCommented(alkuAika, loppuAika, UUTINEN, sivu)),
+        toDto(katseluRepository.findMostViewed(alkuPaiva, loppuPaiva, UUTINEN, sivu)));
   }
 
   /** Returns the count for every workplace (including zero counts), and for unset (null). */

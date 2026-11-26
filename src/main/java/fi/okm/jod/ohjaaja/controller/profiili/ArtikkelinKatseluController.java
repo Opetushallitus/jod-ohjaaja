@@ -11,10 +11,13 @@ package fi.okm.jod.ohjaaja.controller.profiili;
 
 import fi.okm.jod.ohjaaja.domain.JodUser;
 import fi.okm.jod.ohjaaja.dto.SivuDto;
+import fi.okm.jod.ohjaaja.entity.SisaltoTyyppi;
 import fi.okm.jod.ohjaaja.service.ArtikkelinKatseluService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "artikkeli")
 public class ArtikkelinKatseluController {
+  private static final String TYYPPI_DESCRIPTION =
+      "Content types to include (repeatable). Defaults to ARTIKKELI.";
+
   private final ArtikkelinKatseluService service;
 
   @PostMapping("/katselu/{artikkeliErc}")
@@ -42,18 +48,25 @@ public class ArtikkelinKatseluController {
   }
 
   @GetMapping("/katselu/katsotuimmat")
-  @Operation(summary = "Gets the most viewed article Ercs")
+  @Operation(summary = "Gets the most viewed content Ercs")
   SivuDto<String> getMostViewedArtikkeliIds(
       @Nullable @RequestParam List<String> filterByArtikkeliErcs,
+      @RequestParam(required = false) @Parameter(description = TYYPPI_DESCRIPTION)
+          Set<SisaltoTyyppi> tyyppi,
       @RequestParam(defaultValue = "12") int koko) {
     return service.findMostViewedArtikkeliErcs(
-        filterByArtikkeliErcs, PageRequest.of(0, koko, Sort.by(Sort.Direction.DESC, "summa")));
+        filterByArtikkeliErcs,
+        tyyppi,
+        PageRequest.of(0, koko, Sort.by(Sort.Direction.DESC, "summa")));
   }
 
   @GetMapping("/viimeksi-katsellut")
-  @Operation(summary = "Gets the last viewed article Ercs")
+  @Operation(summary = "Gets the last viewed content Ercs")
   SivuDto<String> getMostRecentViewedArtikkeliIds(
-      @AuthenticationPrincipal JodUser jodUser, @RequestParam(defaultValue = "20") int koko) {
-    return service.findMostRecentViewedArtikkeliErcsByUser(jodUser, Pageable.ofSize(koko));
+      @AuthenticationPrincipal JodUser jodUser,
+      @RequestParam(required = false) @Parameter(description = TYYPPI_DESCRIPTION)
+          Set<SisaltoTyyppi> tyyppi,
+      @RequestParam(defaultValue = "20") int koko) {
+    return service.findMostRecentViewedArtikkeliErcsByUser(jodUser, tyyppi, Pageable.ofSize(koko));
   }
 }
